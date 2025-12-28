@@ -60,7 +60,7 @@ export function FreelanceComparison() {
     }, [grossIncome, currency, options]);
 
     return (
-        <div className="w-full max-w-5xl mx-auto space-y-12">
+        <div className="w-full max-w-7xl mx-auto space-y-12">
 
             {/* Input Section */}
             <div className="flex flex-col items-center gap-6 text-center">
@@ -188,7 +188,7 @@ function ComparisonCard({ title, subtitle, net, gross, breakdown, currency, isOp
     const totalTaxes = gross - net;
 
     return (
-        <Card className={`overflow-hidden border-0 shadow-lg ${isOptimal ? 'ring-2 ring-blue-500' : ''}`}>
+        <Card className={`overflow-hidden border-0 shadow-lg ${isOptimal ? 'ring-2 ring-blue-500' : ''} min-w-[300px]`}>
             {/* Header */}
             <div className="bg-slate-900 text-white p-5">
                 <div className="flex flex-col">

@@ -1,4 +1,6 @@
 import { FreelanceComparison } from "@/components/calculator/FreelanceComparison";
+import { TaxFAQ } from "@/components/calculator/TaxFAQ";
+import { WorkingDaysCalendar } from "@/components/calculator/WorkingDaysCalendar";
 
 /**
  * HOME PAGE
@@ -23,23 +25,45 @@ export default function Home() {
       <main className="container mx-auto px-4 py-8 md:py-12 lg:py-16">
         <article>
           {/* Hero Section */}
-          <header className="text-center mb-10 md:mb-14">
+          <header className="relative text-center mb-10 md:mb-14">
+            {/* Ambient Background Image */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] opacity-20 -z-10 pointer-events-none">
+              <img
+                src="/images/hero-bg.png"
+                alt="Fiscal Dashboard Background"
+                src="/images/hero-bg.png"
+                alt="Fiscal Dashboard Background"
+                className="w-full h-full object-contain blur-2xl scale-110 opacity-60"
+              />
+            </div>
+
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-blue-900/30 text-blue-300 text-xs md:text-sm font-medium mb-4 md:mb-6">
-              <BoltIcon className="w-3.5 h-3.5 md:w-4 md:h-4" />
+            <div className="inline-flex items-center gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-blue-900/30 text-blue-300 text-xs md:text-sm font-medium mb-4 md:mb-6 border border-blue-500/20 backdrop-blur-sm">
+              <BoltIcon className="w-3.5 h-3.5 md:w-4 md:h-4 text-blue-400" />
               Calcule în timp real
             </div>
 
-            {/* Title */}
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-4 md:mb-5 tracking-tight leading-tight">
-              Calculator Taxe{" "}
-              <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                România 2026
-              </span>
-            </h2>
+            {/* Title with 3D Icon */}
+            <div className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-10 mb-8 md:mb-12">
+              <div className="relative w-28 h-28 md:w-36 md:h-36 animate-float flex-shrink-0">
+                <div className="absolute inset-0 bg-blue-500/20 blur-2xl rounded-full"></div>
+                <img
+                  src="/images/calc-icon-3d.png"
+                  alt="Calculator Icon 3D"
+                  className="relative w-full h-full object-contain drop-shadow-2xl mix-blend-screen"
+                />
+              </div>
+
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight text-center md:text-left">
+                Calculator Taxe<br />
+                <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                  România 2026
+                </span>
+              </h2>
+            </div>
 
             {/* Description */}
-            <p className="text-base md:text-lg lg:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-base md:text-lg lg:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed relative z-10">
               Compară instant costurile între{" "}
               <strong className="text-slate-200">CIM</strong>,{" "}
               <strong className="text-slate-200">PFA</strong> și{" "}
@@ -54,7 +78,7 @@ export default function Home() {
           </section>
 
           {/* Info Cards */}
-          <section id="info" className="mt-16 md:mt-20 max-w-5xl mx-auto" aria-labelledby="info-heading">
+          <section id="info" className="mt-16 md:mt-20 max-w-7xl mx-auto" aria-labelledby="info-heading">
             <h2 id="info-heading" className="text-xl md:text-2xl font-bold text-white mb-6 md:mb-8 text-center">
               Tipuri de Impozitare
             </h2>
@@ -85,21 +109,34 @@ export default function Home() {
               />
             </div>
           </section>
+
+          {/* Working Days Calendar */}
+          <section className="mt-16 md:mt-20 max-w-7xl mx-auto">
+            <div className="grid lg:grid-cols-5 gap-12 items-center">
+              <div className="lg:col-span-2 relative hidden lg:block">
+                <div className="absolute inset-0 bg-blue-500/10 blur-3xl rounded-full"></div>
+                <img
+                  src="/images/working-days-illus.png"
+                  alt="Fiscal Calendar Illustration"
+                  className="relative w-full h-auto object-contain drop-shadow-2xl rounded-2xl border border-white/5 bg-white/5 backdrop-blur-sm p-2 mix-blend-screen"
+                />
+                <div className="mt-6 text-center">
+                  <h3 className="text-xl font-bold text-white mb-2">Planifică Eficient</h3>
+                  <p className="text-sm text-slate-400 leading-relaxed">
+                    Consultă calendarul oficial al zilelor lucrătoare și libere pentru a-ți optimiza concediile și proiectele.
+                  </p>
+                </div>
+              </div>
+              <div className="lg:col-span-3">
+                <WorkingDaysCalendar variant="dark" />
+              </div>
+            </div>
+          </section>
+
+          {/* FAQ Section */}
+          <TaxFAQ />
         </article>
       </main>
-
-      {/* Footer */}
-      <footer className="border-t border-slate-800 mt-16 md:mt-20 py-8 md:py-10 bg-slate-900/50">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-xs md:text-sm text-slate-400">
-            © 2025 Simulator Fiscal România.
-            Calculele sunt orientative și nu constituie consultanță fiscală.
-          </p>
-          <p className="text-[10px] md:text-xs text-slate-500 mt-2 md:mt-3">
-            Salariu minim brut 2025: 3.700 RON · Curs valutar: 1 EUR = 5,00 RON
-          </p>
-        </div>
-      </footer>
     </div>
   );
 }

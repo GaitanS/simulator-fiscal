@@ -25,7 +25,8 @@ const TAX_RATES: TaxRates = Object.freeze({
         CASS_CAP_DIVIDEND: 24
     }),
     CONSTANTS: Object.freeze({
-        MINIMUM_WAGE: 3700,
+        MINIMUM_WAGE: 4050,
+        MINIMUM_WAGE_JULY_2026: 4325,
         EUR_RON_RATE: 5.0
     })
 });

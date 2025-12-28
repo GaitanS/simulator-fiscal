@@ -229,12 +229,12 @@ class FiscalDataAccessLayer {
     /**
      * Calculate a specific scenario (type-safe version)
      */
-    public calculateCIM(grossIncome: number, currency: Currency = 'RON'): CIMCalculationResult {
+    public calculateCIM(grossIncome: number, currency: Currency = 'RON', minWageOverride?: number): CIMCalculationResult {
         const grossIncomeRON = currency === 'EUR'
             ? convertCurrency(grossIncome, 'EUR', 'RON', this.exchangeRate)
             : grossIncome;
 
-        const result = calculateCIM(grossIncomeRON);
+        const result = calculateCIM(grossIncomeRON, 'RON', minWageOverride);
 
         if (currency === 'EUR') {
             return transformResultCurrency(result, 'EUR', 'RON', this.exchangeRate) as CIMCalculationResult;

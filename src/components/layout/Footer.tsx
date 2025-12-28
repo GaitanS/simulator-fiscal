@@ -7,7 +7,7 @@ export function Footer() {
                     <br />
                     Configurat conform codului fiscal 2026.
                     <br />
-                    Salariu minim brut 2026: 3.700 RON · Curs valutar: 1 EUR = 5,00 RON
+                    Salariu minim brut 2026: 4.050 RON (din iulie: 4.325 RON) · Curs valutar: 1 EUR = 5,09 RON
                 </p>
             </div>
         </footer>

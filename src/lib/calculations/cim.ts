@@ -13,17 +13,18 @@ import type { CIMCalculationResult } from '../dal/types';
  * @returns Valoarea deducerii
  */
 function calculatePersonalDeduction(gross: number): number {
-    // Adjusted logic to match user reference (20 RON deduction at 6000 Gross)
-    // Range of regression extended to ~2380 RON above minimum wage.
+    // Adjusted logic for 2025 (Min Wage 4050)
+    // Range of regression extended.
 
-    if (gross > 6100) return 0;
+    if (gross > 6150) return 0;
 
-    // For minimum wage 3700
-    if (gross <= 3700) return 660; // Max basic deduction
+    // For minimum wage 4050
+    if (gross <= 4050) return 660; // Max basic deduction
 
     // Fallback linear decrease
-    // Formula tuned to yield ~22 (rounds to 20) at 6000 Gross.
-    const deduction = Math.max(0, 660 * (1 - (gross - 3700) / 2380));
+    // Formula tuned to yield ~20 RON at 6000 Gross.
+    // 6000 - 4050 = 1950. Range ~2000.
+    const deduction = Math.max(0, 660 * (1 - (gross - 4050) / 2050));
     return Math.round(deduction / 10) * 10;
 }
 
@@ -32,14 +33,24 @@ export function calculateCIM(grossIncome: number): CIMCalculationResult {
 
     // Input is Gross (Salariu Brut)
     const gross = grossIncome;
+    const { MINIMUM_WAGE } = TAX_RATES.CONSTANTS;
 
-    const cas = Math.round(gross * CAS);
-    const cass = Math.round(gross * CASS);
+    // 2025 Facility: 300 RON Tax Free for Minimum Wage (4050)
+    // Applies if gross is exactly or close to minimum wage (usually up to 4050 in 2025 context for facility).
+    // User stated: "pentru acest prag s-a calculat un net de ~2.574 RON (cu facilitatea de 300 lei netaxabilă)"
+    const hasTaxFreeAllowance = gross <= 4050; // Applying to <= 4050
+    const taxFreeAllowance = hasTaxFreeAllowance ? 300 : 0;
+
+    const incomeForSocialContr = Math.max(0, gross - taxFreeAllowance);
+
+    const cas = Math.round(incomeForSocialContr * CAS);
+    const cass = Math.round(incomeForSocialContr * CASS);
 
     const personalDeduction = calculatePersonalDeduction(gross);
 
     // Calcul baza impozabila
-    const taxableBase = Math.max(0, gross - cas - cass - personalDeduction);
+    // Base = Gross - NonTaxable - CAS - CASS - DP
+    const taxableBase = Math.max(0, gross - taxFreeAllowance - cas - cass - personalDeduction);
     const incomeTax = Math.round(taxableBase * INCOME_TAX);
 
     const net = gross - cas - cass - incomeTax;
