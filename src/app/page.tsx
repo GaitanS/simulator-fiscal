@@ -26,7 +26,7 @@ export const metadata: Metadata = {
  */
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 overflow-x-hidden">
       {/* Skip to main content link for accessibility */}
       <a
         href="#calculator"
@@ -35,13 +35,11 @@ export default function Home() {
         Salt la calculator
       </a>
 
-
-
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8 md:py-12 lg:py-16">
         <article>
           {/* Hero Section */}
-          <header className="relative text-center mb-10 md:mb-14">
+          <header className="relative text-center mb-10 md:mb-14 overflow-hidden">
             {/* Ambient Background Image */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] opacity-20 -z-10 pointer-events-none">
               <img
@@ -68,9 +66,9 @@ export default function Home() {
                 />
               </div>
 
-              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight text-center md:text-left">
-                Calculator Taxe<br />
-                <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight text-center md:text-left whitespace-nowrap">
+                Calculator Taxe <span className="hidden md:inline">&nbsp;</span>
+                <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent block md:inline">
                   România 2026
                 </span>
               </h2>

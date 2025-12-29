@@ -11,6 +11,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('http://localhost:3000'),
   title: "Simulator Fiscal 2026 | Calculator Taxe CIM, PFA, SRL România",
   description: "Calculează instant taxele pentru CIM, PFA și SRL. Compară costurile și alege varianta cea mai eficientă pentru tine. Calculator fiscal gratuit România 2026.",
   keywords: "calculator taxe romania, salariu net brut, CIM PFA SRL, simulator fiscal, calcul impozit, contributii sociale, taxe 2026",
