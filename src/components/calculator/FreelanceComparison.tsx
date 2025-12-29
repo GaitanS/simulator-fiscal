@@ -170,24 +170,9 @@ export function FreelanceComparison() {
                                     </h4>
 
                                     <div className="space-y-2">
-                                        <div className="flex justify-between items-center">
-                                            <Label htmlFor="provisions" className="text-sm font-medium dark:text-slate-300">
-                                                Provizioane Deductibile {period === 'ANNUAL' ? '(Anual)' : '(Lunar)'} (RON)
-                                            </Label>
-                                            <ProvisionsHelper
-                                                onCalculate={(val) => {
-                                                    // Ensure value fits period (Helper usually calculates total amount)
-                                                    // If we are in Monthly mode, we should probably divide by 12?
-                                                    // Or assume user entered Monthly receivable?
-                                                    // Most likely Provisions are an annual event/adjustment.
-                                                    // Strategy: Set the VALUE directly as the input.
-                                                    // If mode is ANNUAL, set directly.
-                                                    // If mode is MONTHLY, divide by 12.
-                                                    const adjusted = period === 'ANNUAL' ? val : val / 12;
-                                                    handleOptionChange('deductibleProvisions', Math.round(adjusted).toString());
-                                                }}
-                                            />
-                                        </div>
+                                        <Label htmlFor="provisions" className="text-sm font-medium dark:text-slate-300">
+                                            Provizioane Deductibile {period === 'ANNUAL' ? '(Anual)' : '(Lunar)'} (RON)
+                                        </Label>
                                         <InputField
                                             id="provisions"
                                             value={Math.round(options.deductibleProvisions * (period === 'ANNUAL' ? 12 : 1)).toString()}
@@ -195,7 +180,15 @@ export function FreelanceComparison() {
                                             currency="RON"
                                             placeholder="0"
                                         />
-                                        <p className="text-[10px] text-slate-400">Reduce baza impozabilă înainte de aplicarea cotei de 16%.</p>
+                                        <div className="flex items-center justify-between">
+                                            <p className="text-[10px] text-slate-400">Reduce baza impozabilă înainte de aplicarea cotei de 16%.</p>
+                                            <ProvisionsHelper
+                                                onCalculate={(val) => {
+                                                    const adjusted = period === 'ANNUAL' ? val : val / 12;
+                                                    handleOptionChange('deductibleProvisions', Math.round(adjusted).toString());
+                                                }}
+                                            />
+                                        </div>
                                         {options.deductibleProvisions > 0 && (
                                             <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-100 dark:border-blue-800">
                                                 <p className="text-xs text-blue-700 dark:text-blue-300">
@@ -209,17 +202,9 @@ export function FreelanceComparison() {
                                     </div>
 
                                     <div className="space-y-2">
-                                        <div className="flex justify-between items-center">
-                                            <Label htmlFor="reinvested" className="text-sm font-medium dark:text-slate-300">
-                                                Profit Reinvestit {period === 'ANNUAL' ? '(Anual)' : '(Lunar)'} (RON)
-                                            </Label>
-                                            <ReinvestedProfitHelper
-                                                onCalculate={(val) => {
-                                                    const adjusted = period === 'ANNUAL' ? val : val / 12;
-                                                    handleOptionChange('reinvestedProfit', Math.round(adjusted).toString());
-                                                }}
-                                            />
-                                        </div>
+                                        <Label htmlFor="reinvested" className="text-sm font-medium dark:text-slate-300">
+                                            Profit Reinvestit {period === 'ANNUAL' ? '(Anual)' : '(Lunar)'} (RON)
+                                        </Label>
                                         <InputField
                                             id="reinvested"
                                             value={Math.round(options.reinvestedProfit * (period === 'ANNUAL' ? 12 : 1)).toString()}
@@ -227,7 +212,15 @@ export function FreelanceComparison() {
                                             currency="RON"
                                             placeholder="0"
                                         />
-                                        <p className="text-[10px] text-slate-400">Scutire de impozit pentru partea reinvestită.</p>
+                                        <div className="flex items-center justify-between">
+                                            <p className="text-[10px] text-slate-400">Scutire de impozit pentru partea reinvestită.</p>
+                                            <ReinvestedProfitHelper
+                                                onCalculate={(val) => {
+                                                    const adjusted = period === 'ANNUAL' ? val : val / 12;
+                                                    handleOptionChange('reinvestedProfit', Math.round(adjusted).toString());
+                                                }}
+                                            />
+                                        </div>
                                         {options.reinvestedProfit > 0 && (
                                             <div className="mt-2 p-2 bg-green-50 dark:bg-green-900/20 rounded border border-green-100 dark:border-green-800">
                                                 <p className="text-xs text-green-700 dark:text-green-300">
