@@ -47,8 +47,6 @@ export default function Home() {
               <img
                 src="/images/hero-bg.png"
                 alt="Fiscal Dashboard Background"
-                src="/images/hero-bg.png"
-                alt="Fiscal Dashboard Background"
                 className="w-full h-full object-contain blur-2xl scale-110 opacity-60"
               />
             </div>
