@@ -50,7 +50,9 @@ const ScenarioSchema = z.enum(['CIM', 'PFA', 'SRL'], {
 export const SmartOptionsSchema = z.object({
     isPensioner: z.boolean().optional(),
     isHandicapped: z.boolean().optional(),
-    hasEmployee: z.boolean().optional()
+    hasEmployee: z.boolean().optional(),
+    reinvestedProfit: MonetaryValueSchema.optional(),
+    deductibleProvisions: MonetaryValueSchema.optional()
 });
 
 // =============================================================================

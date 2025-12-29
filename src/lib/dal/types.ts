@@ -202,7 +202,12 @@ export interface CalculationInput {
   /** PFA: Este pensionar? (Scutire CAS) */
   isPensioner?: boolean;
   /** PFA: Este persoană cu handicap? (Scutire Impozit) */
+  /** PFA: Este persoană cu handicap? (Scutire Impozit) */
   isHandicapped?: boolean;
+  /** SRL: Profit Reinvestit (scutit de impozit profit) */
+  reinvestedProfit?: number;
+  /** SRL: Provizioane deductibile (scade baza impozabilă) */
+  deductibleProvisions?: number;
 }
 
 /**

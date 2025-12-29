@@ -266,13 +266,36 @@ class FiscalDataAccessLayer {
         grossIncome: number,
         currency: Currency = 'RON',
         annualRevenue?: number,
-        hasEmployee: boolean = true
+        hasEmployee: boolean = true,
+        reinvestedProfit: number = 0,
+        deductibleProvisions: number = 0
     ): SRLCalculationResult {
         const grossIncomeRON = currency === 'EUR'
             ? convertCurrency(grossIncome, 'EUR', 'RON', this.exchangeRate)
             : grossIncome;
 
-        const result = calculateSRL(grossIncomeRON, annualRevenue, hasEmployee, this.exchangeRate);
+        // Convert options to RON if needed? 
+        // Logic assumes options are in same currency as income?
+        // Usually inputs are aligned. If user selects EUR, prompts should be EUR.
+        // Let's assume options are in the SAME currency as grossIncome.
+        // So we need to convert them too if they are passed.
+
+        let reinvestedProfitRON = reinvestedProfit;
+        let deductibleProvisionsRON = deductibleProvisions;
+
+        if (currency === 'EUR') {
+            reinvestedProfitRON = convertCurrency(reinvestedProfit, 'EUR', 'RON', this.exchangeRate);
+            deductibleProvisionsRON = convertCurrency(deductibleProvisions, 'EUR', 'RON', this.exchangeRate);
+        }
+
+        const result = calculateSRL(
+            grossIncomeRON,
+            annualRevenue,
+            hasEmployee,
+            this.exchangeRate,
+            reinvestedProfitRON,
+            deductibleProvisionsRON
+        );
 
         if (currency === 'EUR') {
             return transformResultCurrency(result, 'EUR', 'RON', this.exchangeRate) as SRLCalculationResult;
@@ -340,6 +363,8 @@ class FiscalDataAccessLayer {
         options?: {
             isPensioner?: boolean;
             isHandicapped?: boolean;
+            reinvestedProfit?: number;
+            deductibleProvisions?: number;
         }
     ): FreelanceComparisonResult {
         // Validate with Freelance schema
@@ -377,7 +402,9 @@ class FiscalDataAccessLayer {
             grossIncome,
             currency,
             undefined,
-            false // Enforce Profit logic
+            false, // Enforce Profit logic
+            options?.reinvestedProfit,
+            options?.deductibleProvisions
         );
 
         // Find optimal among these 3

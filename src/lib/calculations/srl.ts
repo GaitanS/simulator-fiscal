@@ -17,7 +17,9 @@ export function calculateSRL(
     grossIncome: number,
     annualRevenue: number = 0,
     hasEmployee: boolean = true,
-    exchangeRate: number = 5.0
+    exchangeRate: number = 5.0,
+    reinvestedProfit: number = 0,
+    deductibleProvisions: number = 0
 ): CalculationResult {
     const {
         MICRO_TAX_LOW,
@@ -52,18 +54,26 @@ export function calculateSRL(
         employeeTotalCost = salaryGross + SalaryCAM; // ~3783
     } else {
         // PROFIT TAX REGIME (16%)
-        // Assume 0 expenses (Gross Profit = Revenue)
-        corporateTax = grossIncome * 0.16;
+        // Base = Gross - Expenses (Provisions)
+        // TaxableBase = Base - ReinvestedProfit
+        // Can't be negative
+        const expenses = deductibleProvisions;
+        const grossProfitAccounting = Math.max(0, grossIncome - expenses);
+        const taxableBase = Math.max(0, grossProfitAccounting - reinvestedProfit);
+
+        corporateTax = taxableBase * 0.16;
         employeeTotalCost = 0;
     }
 
     // --- 2. DIVIDEND CALCULATION ---
-    // Gross Profit for Dividends = Revenue - Taxes - Expenses
-    const grossProfit = Math.max(0, grossIncome - corporateTax - employeeTotalCost);
+    // Gross Profit for Dividends = Revenue - Taxes - Expenses - ReinvestedProfit (money stays in firm)
+    // Note: Reinvested profit is NOT distributed as dividends.
+    const expenses = !hasEmployee ? deductibleProvisions : 0; // Simplified for this logic branch
+    const availableForDividends = Math.max(0, grossIncome - corporateTax - employeeTotalCost - expenses - reinvestedProfit);
 
     // Dividend Tax (8%)
-    const dividendTax = grossProfit * DIVIDEND_TAX;
-    const netDividends = grossProfit - dividendTax;
+    const dividendTax = availableForDividends * DIVIDEND_TAX;
+    const netDividends = availableForDividends - dividendTax;
 
     // --- 3. CASS ON DIVIDENDS ---
     // Capped annually at 6/12/24 salaries
