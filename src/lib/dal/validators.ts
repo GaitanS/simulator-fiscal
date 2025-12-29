@@ -19,29 +19,19 @@ import { z } from 'zod';
  * - Trebuie să fie pozitiv sau zero
  * - Maximum 10 milioane (pentru a preveni overflow)
  */
-const MonetaryValueSchema = z.number({
-    required_error: 'Valoarea este obligatorie',
-    invalid_type_error: 'Valoarea trebuie să fie un număr'
-})
-    .finite('Valoarea trebuie să fie un număr finit')
+const MonetaryValueSchema = z.number()
     .nonnegative('Valoarea trebuie să fie pozitivă sau zero')
     .max(10000000, 'Valoarea maximă este 10.000.000');
 
 /**
  * Schema pentru monedă
  */
-const CurrencySchema = z.enum(['RON', 'EUR'], {
-    required_error: 'Moneda este obligatorie',
-    invalid_type_error: 'Moneda trebuie să fie RON sau EUR'
-});
+const CurrencySchema = z.enum(['RON', 'EUR']);
 
 /**
  * Schema pentru scenariu fiscal
  */
-const ScenarioSchema = z.enum(['CIM', 'PFA', 'SRL'], {
-    required_error: 'Scenariul este obligatoriu',
-    invalid_type_error: 'Scenariul trebuie să fie CIM, PFA sau SRL'
-});
+const ScenarioSchema = z.enum(['CIM', 'PFA', 'SRL']);
 
 // =============================================================================
 // SMART OPTIONS SCHEMA
@@ -82,8 +72,23 @@ export const CalculationInputSchema = z.object({
      * Cifra de afaceri anuală (opțional, necesar pentru SRL)
      * Folosită pentru a determina rata impozitului micro (1% vs 3%)
      */
-    annualRevenue: MonetaryValueSchema.optional()
-}).strict();
+    annualRevenue: MonetaryValueSchema.optional(),
+
+    /**
+     * Are angajat (pentru SRL Micro)
+     */
+    hasEmployee: z.boolean().optional(),
+
+    /**
+     * Este pensionar (pentru PFA - scutire CAS)
+     */
+    isPensioner: z.boolean().optional(),
+
+    /**
+     * Este persoană cu handicap (pentru PFA - scutire impozit)
+     */
+    isHandicapped: z.boolean().optional()
+});
 
 /**
  * Schema parțială pentru doar venitul net

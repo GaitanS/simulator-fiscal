@@ -234,7 +234,7 @@ class FiscalDataAccessLayer {
             ? convertCurrency(grossIncome, 'EUR', 'RON', this.exchangeRate)
             : grossIncome;
 
-        const result = calculateCIM(grossIncomeRON, 'RON', minWageOverride);
+        const result = calculateCIM(grossIncomeRON);
 
         if (currency === 'EUR') {
             return transformResultCurrency(result, 'EUR', 'RON', this.exchangeRate) as CIMCalculationResult;
@@ -259,7 +259,7 @@ class FiscalDataAccessLayer {
             return transformResultCurrency(result, 'EUR', 'RON', this.exchangeRate) as PFACalculationResult;
         }
 
-        return result;
+        return result as PFACalculationResult;
     }
 
     public calculateSRL(
@@ -301,7 +301,7 @@ class FiscalDataAccessLayer {
             return transformResultCurrency(result, 'EUR', 'RON', this.exchangeRate) as SRLCalculationResult;
         }
 
-        return result;
+        return result as SRLCalculationResult;
     }
 
     // ===========================================================================

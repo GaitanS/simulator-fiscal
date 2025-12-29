@@ -6,6 +6,6 @@
  * @module lib/calculations
  */
 
-export { calculateCIM, calculateCIMNetFromGross } from './cim';
+export { calculateCIM } from './cim';
 export { calculatePFA } from './pfa';
-export { calculateSRL, calculateDividendExtraction } from './srl';
+export { calculateSRL } from './srl';

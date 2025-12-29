@@ -104,11 +104,14 @@ export function transformBreakdownCurrency(
     // Handle each breakdown type
     if ('personalDeduction' in breakdown) {
         // CIM breakdown
+        const cimBreakdown = breakdown as { cas: number; cass: number; incomeTax: number; personalDeduction: number; cam: number; completeSalary: number };
         return Object.freeze({
-            cas: convert(breakdown.cas),
-            cass: convert(breakdown.cass),
-            incomeTax: convert(breakdown.incomeTax),
-            personalDeduction: convert(breakdown.personalDeduction)
+            cas: convert(cimBreakdown.cas),
+            cass: convert(cimBreakdown.cass),
+            incomeTax: convert(cimBreakdown.incomeTax),
+            personalDeduction: convert(cimBreakdown.personalDeduction),
+            cam: convert(cimBreakdown.cam),
+            completeSalary: convert(cimBreakdown.completeSalary)
         });
     } else if ('casCapped' in breakdown) {
         // PFA breakdown

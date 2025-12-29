@@ -93,7 +93,7 @@ export function SalaryEvolutionChart() {
                                 }}
                                 itemStyle={{ color: '#fff', fontSize: '14px', fontWeight: 500 }}
                                 labelStyle={{ color: '#94a3b8', marginBottom: '8px', fontSize: '12px' }}
-                                formatter={(value: any, name: string) => [`${value} RON`, name]}
+                                formatter={(value: any, name: any) => [`${value} RON`, name]}
                             />
                             <Legend
                                 verticalAlign="top"
