@@ -11,8 +11,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { ProvisionsHelper } from './ProvisionsHelper';
-import { ReinvestedProfitHelper } from './ReinvestedProfitHelper';
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Info } from 'lucide-react';
+// Removing ProvisionsHelper and ReinvestedProfitHelper as they will be inlined
 
 export function FreelanceComparison() {
     // Generate unique IDs
@@ -29,7 +30,12 @@ export function FreelanceComparison() {
         isPensioner: false,
         isHandicapped: false,
         reinvestedProfit: 0,
-        deductibleProvisions: 0
+        deductibleProvisions: 0,
+        // Helper-specific fields
+        provisionBaseAmount: '',
+        provisionType: '270_DAYS' as '270_DAYS' | 'BANKRUPTCY',
+        investmentAmount: '',
+        investmentCategories: ['TECH_EQUIPMENT'] as string[]
     });
 
     // Debounced calculation
@@ -59,6 +65,19 @@ export function FreelanceComparison() {
         setPeriod(newPeriod);
         const displayValue = newPeriod === 'ANNUAL' ? grossIncome * 12 : grossIncome;
         setInputValue(Math.round(displayValue).toString());
+
+        // Update helper display values if they exist
+        setOptions(prev => ({
+            ...prev,
+            provisionBaseAmount: prev.provisionBaseAmount ?
+                (newPeriod === 'ANNUAL' ?
+                    Math.round(parseFloat(prev.provisionBaseAmount) * 12).toString() :
+                    Math.round(parseFloat(prev.provisionBaseAmount) / 12).toString()) : '',
+            investmentAmount: prev.investmentAmount ?
+                (newPeriod === 'ANNUAL' ?
+                    Math.round(parseFloat(prev.investmentAmount) * 12).toString() :
+                    Math.round(parseFloat(prev.investmentAmount) / 12).toString()) : ''
+        }));
     }, [grossIncome]);
 
     // Update debounced setter to handle period
@@ -72,11 +91,7 @@ export function FreelanceComparison() {
     }, [debouncedSetIncome, period]);
 
     // Handlers for Advanced Options (Numeric)
-    const handleOptionChange = useCallback((field: 'reinvestedProfit' | 'deductibleProvisions', value: string) => {
-        const numericValue = parseFloat(value.replace(/[^0-9.]/g, '')) || 0;
-        const monthlyValue = period === 'ANNUAL' ? numericValue / 12 : numericValue;
-        setOptions(prev => ({ ...prev, [field]: monthlyValue }));
-    }, [period]);
+    // No longer using handleOptionChange for these as they are handled inline with more complex logic
 
     // Calculation Result
     const comparison = useMemo<FreelanceComparisonResult | null>(() => {
@@ -98,7 +113,7 @@ export function FreelanceComparison() {
                     Câți bani îți rămân în mână {period === 'ANNUAL' ? 'anual' : 'lunar'}?
                 </h2>
                 <p className="text-slate-500 dark:text-slate-400 -mt-4">
-                    Estimare lunară bazată pe venitul și cheltuielile tale
+                    Estimare {period === 'ANNUAL' ? 'anuală' : 'lunară'} bazată pe venitul și cheltuielile tale
                 </p>
 
                 <div className="w-full max-w-sm space-y-4 pt-4">
@@ -135,102 +150,154 @@ export function FreelanceComparison() {
                 {/* Smart Toggles Accordion */}
                 <Accordion type="single" collapsible className="w-full max-w-sm">
                     <AccordionItem value="options" className="border-slate-200 dark:border-slate-800">
-                        <AccordionTrigger className="text-sm text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white">
+                        <AccordionTrigger className="text-sm text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white text-center flex justify-center w-full">
                             Opțiuni Avansate & Scutiri
                         </AccordionTrigger>
                         <AccordionContent>
-                            <div className="space-y-4 pt-2 pb-4">
-                                <div className="flex items-center space-x-2">
-                                    <Checkbox
-                                        id="pensioner"
-                                        checked={options.isPensioner}
-                                        onCheckedChange={(checked) => setOptions(prev => ({ ...prev, isPensioner: checked as boolean }))}
-                                    />
-                                    <Label htmlFor="pensioner" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 dark:text-slate-300">
-                                        Sunt pensionar (Scutire CAS PFA)
-                                    </Label>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <Checkbox
-                                        id="handicapped"
-                                        checked={options.isHandicapped}
-                                        onCheckedChange={(checked) => setOptions(prev => ({ ...prev, isHandicapped: checked as boolean }))}
-                                    />
-                                    <Label htmlFor="handicapped" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 dark:text-slate-300">
-                                        Persoană cu handicap (Scutire Impozit)
-                                    </Label>
+                            <div className="space-y-6 pt-2 pb-4">
+                                <div className="space-y-3">
+                                    <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors">
+                                        <Checkbox
+                                            id="pensioner"
+                                            checked={options.isPensioner}
+                                            onCheckedChange={(checked) => setOptions(prev => ({ ...prev, isPensioner: checked as boolean }))}
+                                        />
+                                        <Label htmlFor="pensioner" className="text-sm font-medium leading-none cursor-pointer dark:text-slate-300">
+                                            Sunt pensionar (Scutire CAS PFA)
+                                        </Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors">
+                                        <Checkbox
+                                            id="handicapped"
+                                            checked={options.isHandicapped}
+                                            onCheckedChange={(checked) => setOptions(prev => ({ ...prev, isHandicapped: checked as boolean }))}
+                                        />
+                                        <Label htmlFor="handicapped" className="text-sm font-medium leading-none cursor-pointer dark:text-slate-300">
+                                            Persoană cu handicap (Scutire Impozit)
+                                        </Label>
+                                    </div>
                                 </div>
 
-                                <div className="h-px bg-slate-200 dark:bg-slate-700 my-4" />
+                                <div className="h-px bg-slate-200 dark:bg-slate-700" />
 
                                 {/* SRL Profit Optimization */}
                                 <div className="space-y-4">
-                                    <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                                        Optimizare SRL Profit (16%)
+                                    <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">
+                                        Optimizare SRL Profit 16%
                                     </h4>
 
-                                    <div className="space-y-2">
-                                        <Label htmlFor="provisions" className="text-sm font-medium dark:text-slate-300">
-                                            Provizioane Deductibile {period === 'ANNUAL' ? '(Anual)' : '(Lunar)'} (RON)
-                                        </Label>
-                                        <InputField
-                                            id="provisions"
-                                            value={Math.round(options.deductibleProvisions * (period === 'ANNUAL' ? 12 : 1)).toString()}
-                                            onChange={(val) => handleOptionChange('deductibleProvisions', val)}
-                                            currency="RON"
-                                            placeholder="0"
-                                        />
-                                        <div className="flex items-center justify-between">
-                                            <p className="text-[10px] text-slate-400">Reduce baza impozabilă înainte de aplicarea cotei de 16%.</p>
-                                            <ProvisionsHelper
-                                                onCalculate={(val) => {
-                                                    const adjusted = period === 'ANNUAL' ? val : val / 12;
-                                                    handleOptionChange('deductibleProvisions', Math.round(adjusted).toString());
-                                                }}
-                                            />
+                                    {/* Inline Provisions Helper */}
+                                    <div className="space-y-4 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-800">
+                                        <div className="flex items-center justify-between gap-2 mb-1">
+                                            <Label className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                                Provizioane (Clienți neîncasați)
+                                            </Label>
+                                            <Info className="w-3.5 h-3.5 text-slate-400" />
                                         </div>
-                                        {options.deductibleProvisions > 0 && (
-                                            <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-100 dark:border-blue-800">
-                                                <p className="text-xs text-blue-700 dark:text-blue-300">
-                                                    <span className="font-semibold">Impact:</span> Ai economisit <span className="font-bold">{Math.round(options.deductibleProvisions * 0.16 * (period === 'ANNUAL' ? 12 : 1))} RON</span> la taxe.
-                                                </p>
-                                                <p className="text-[10px] text-blue-600 dark:text-blue-400 mt-1">
-                                                    Suma de {Math.round(options.deductibleProvisions * (period === 'ANNUAL' ? 12 : 1))} RON rămâne în firmă pentru cheltuieli viitoare.
-                                                </p>
+
+                                        <div className="space-y-3">
+                                            <div className="grid gap-2 text-left">
+                                                <Label htmlFor="provision_base" className="text-[10px] text-slate-500 font-semibold uppercase">Suma Neîncasată (RON)</Label>
+                                                <InputField
+                                                    id="provision_base"
+                                                    value={options.provisionBaseAmount}
+                                                    onChange={(val) => {
+                                                        const num = parseFloat(val.replace(/[^0-9.]/g, '')) || 0;
+                                                        const monthlyBase = period === 'ANNUAL' ? num / 12 : num;
+                                                        const deductibleMonthly = options.provisionType === '270_DAYS' ? monthlyBase * 0.30 : monthlyBase;
+                                                        setOptions(prev => ({
+                                                            ...prev,
+                                                            provisionBaseAmount: val,
+                                                            deductibleProvisions: deductibleMonthly
+                                                        }));
+                                                    }}
+                                                    placeholder="Poți deduce creanțele neîncasați"
+                                                />
                                             </div>
-                                        )}
+
+                                            <div className="grid gap-2 text-left">
+                                                <Label className="text-[10px] text-slate-500 font-semibold uppercase">Motivul Neîncasării</Label>
+                                                <RadioGroup
+                                                    value={options.provisionType}
+                                                    onValueChange={(val) => {
+                                                        const num = parseFloat(options.provisionBaseAmount.replace(/[^0-9.]/g, '')) || 0;
+                                                        const monthlyBase = period === 'ANNUAL' ? num / 12 : num;
+                                                        const deductibleMonthly = (val as any) === '270_DAYS' ? monthlyBase * 0.30 : monthlyBase;
+                                                        setOptions(prev => ({
+                                                            ...prev,
+                                                            provisionType: val as any,
+                                                            deductibleProvisions: deductibleMonthly
+                                                        }));
+                                                    }}
+                                                    className="flex flex-col space-y-2 pt-1"
+                                                >
+                                                    <div className="flex items-center space-x-2">
+                                                        <RadioGroupItem value="270_DAYS" id="opt_270" />
+                                                        <Label htmlFor="opt_270" className="text-xs font-normal text-slate-600 dark:text-slate-400 cursor-pointer">Peste 270 zile (30% deducere)</Label>
+                                                    </div>
+                                                    <div className="flex items-center space-x-2">
+                                                        <RadioGroupItem value="BANKRUPTCY" id="opt_bank" />
+                                                        <Label htmlFor="opt_bank" className="text-xs font-normal text-slate-600 dark:text-slate-400 cursor-pointer">Faliment (100% deducere)</Label>
+                                                    </div>
+                                                </RadioGroup>
+                                            </div>
+                                        </div>
                                     </div>
 
-                                    <div className="space-y-2">
-                                        <Label htmlFor="reinvested" className="text-sm font-medium dark:text-slate-300">
-                                            Profit Reinvestit {period === 'ANNUAL' ? '(Anual)' : '(Lunar)'} (RON)
-                                        </Label>
-                                        <InputField
-                                            id="reinvested"
-                                            value={Math.round(options.reinvestedProfit * (period === 'ANNUAL' ? 12 : 1)).toString()}
-                                            onChange={(val) => handleOptionChange('reinvestedProfit', val)}
-                                            currency="RON"
-                                            placeholder="0"
-                                        />
-                                        <div className="flex items-center justify-between">
-                                            <p className="text-[10px] text-slate-400">Scutire de impozit pentru partea reinvestită.</p>
-                                            <ReinvestedProfitHelper
-                                                onCalculate={(val) => {
-                                                    const adjusted = period === 'ANNUAL' ? val : val / 12;
-                                                    handleOptionChange('reinvestedProfit', Math.round(adjusted).toString());
-                                                }}
-                                            />
+                                    {/* Inline Reinvested Profit Helper */}
+                                    <div className="space-y-4 p-4 bg-slate-100/50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-800">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <Label className="text-sm font-bold text-slate-900 dark:text-white">
+                                                Profit Reinvestit (Active)
+                                            </Label>
                                         </div>
-                                        {options.reinvestedProfit > 0 && (
-                                            <div className="mt-2 p-2 bg-green-50 dark:bg-green-900/20 rounded border border-green-100 dark:border-green-800">
-                                                <p className="text-xs text-green-700 dark:text-green-300">
-                                                    <span className="font-semibold">Impact:</span> Ai economisit <span className="font-bold">{Math.round(options.reinvestedProfit * 0.16 * (period === 'ANNUAL' ? 12 : 1))} RON</span> la taxe.
-                                                </p>
-                                                <p className="text-[10px] text-green-600 dark:text-green-400 mt-1">
-                                                    Suma de {Math.round(options.reinvestedProfit * (period === 'ANNUAL' ? 12 : 1))} RON rămâne în firmă ca active, crescând valoarea companiei.
-                                                </p>
+
+                                        <div className="space-y-3">
+                                            <div className="grid gap-2 text-left">
+                                                <Label className="text-[10px] text-slate-500 font-semibold uppercase">Categorii Eligibile</Label>
+                                                <div className="grid grid-cols-1 gap-1.5">
+                                                    {[
+                                                        { id: 'TECH', label: 'Echipamente Tehnologice' },
+                                                        { id: 'SOFT', label: 'Programe & Software' },
+                                                        { id: 'COMP', label: 'Calculatoare & Periferice' }
+                                                    ].map((cat) => (
+                                                        <div key={cat.id} className="flex items-center space-x-2 p-1.5 rounded bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+                                                            <Checkbox
+                                                                id={`cat_${cat.id}`}
+                                                                checked={options.investmentCategories.includes(cat.id)}
+                                                                onCheckedChange={(checked) => {
+                                                                    setOptions(prev => ({
+                                                                        ...prev,
+                                                                        investmentCategories: checked
+                                                                            ? [...prev.investmentCategories, cat.id]
+                                                                            : prev.investmentCategories.filter(c => c !== cat.id)
+                                                                    }));
+                                                                }}
+                                                            />
+                                                            <Label htmlFor={`cat_${cat.id}`} className="text-xs text-slate-600 dark:text-slate-400 cursor-pointer flex-1">{cat.label}</Label>
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
-                                        )}
+
+                                            <div className="grid gap-2 text-left">
+                                                <Label htmlFor="invest_amount" className="text-[10px] text-slate-500 font-semibold uppercase">Sumă Investită (RON)</Label>
+                                                <InputField
+                                                    id="invest_amount"
+                                                    value={options.investmentAmount}
+                                                    onChange={(val) => {
+                                                        const num = parseFloat(val.replace(/[^0-9.]/g, '')) || 0;
+                                                        const monthlyValue = period === 'ANNUAL' ? num / 12 : num;
+                                                        setOptions(prev => ({
+                                                            ...prev,
+                                                            investmentAmount: val,
+                                                            reinvestedProfit: monthlyValue
+                                                        }));
+                                                    }}
+                                                    placeholder="Investiții în active noi"
+                                                />
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
