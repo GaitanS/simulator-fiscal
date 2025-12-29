@@ -72,7 +72,7 @@ export function ResultsChart({ result, currency }: ResultsChartProps) {
                     </Pie>
 
                     <Tooltip
-                        formatter={(value: number) => fiscalDAL.formatCurrency(value, currency)}
+                        formatter={(value: any) => fiscalDAL.formatCurrency(Number(value) || 0, currency)}
                         contentStyle={{
                             backgroundColor: 'rgba(15, 23, 42, 0.95)',
                             border: 'none',
