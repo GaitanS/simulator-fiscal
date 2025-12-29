@@ -25,10 +25,12 @@ interface InputFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'o
     currency: Currency;
     /** Error message */
     error?: string;
+    /** Style variant */
+    variant?: 'main' | 'compact';
 }
 
 export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
-    ({ value, onChange, currency, error, className, id, ...props }, ref) => {
+    ({ value, onChange, currency, error, className, id, variant = 'main', ...props }, ref) => {
         return (
             <div className="relative w-full">
                 <input
@@ -41,17 +43,16 @@ export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(
                     onChange={(e) => onChange(e.target.value)}
                     className={cn(
                         // Base styles
-                        "w-full h-14 md:h-16 text-xl md:text-3xl font-bold text-center",
+                        "w-full font-bold transition-all duration-200",
+                        variant === 'main' ? "h-14 md:h-16 text-xl md:text-3xl text-center" : "h-11 text-base text-left px-4",
                         // Colors
                         "bg-white/5 border border-white/10 text-white placeholder:text-slate-500",
                         // Focus states
                         "focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-400",
                         // Border radius
-                        "rounded-xl",
+                        variant === 'main' ? "rounded-xl" : "rounded-lg",
                         // Padding for currency suffix
-                        "pr-16 md:pr-20",
-                        // Transition
-                        "transition-all duration-200",
+                        variant === 'main' ? "pr-16 md:pr-20" : "pr-12",
                         // Error state
                         error && "border-red-500 focus:ring-red-500/50 focus:border-red-500",
                         className
