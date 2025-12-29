@@ -36,17 +36,17 @@ export function Header() {
                         <Link
                             href="/"
                             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isActive('/')
-                                    ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white'
-                                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                                ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white'
+                                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/50'
                                 }`}
                         >
-                            Comparație Freelance
+                            Comparator PFA / SRL
                         </Link>
                         <Link
                             href="/calculator-salariu"
                             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isActive('/calculator-salariu')
-                                    ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white'
-                                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                                ? 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white'
+                                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/50'
                                 }`}
                         >
                             Calculator Salariu

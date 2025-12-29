@@ -1,6 +1,22 @@
 import { FreelanceComparison } from "@/components/calculator/FreelanceComparison";
 import { TaxFAQ } from "@/components/calculator/TaxFAQ";
 import { WorkingDaysCalendar } from "@/components/calculator/WorkingDaysCalendar";
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Simulator PFA vs SRL vs Micro 2026 | Calculator Taxe România',
+  description: 'Cel mai avansat calculator de taxe pentru PFA, SRL și Microîntreprindere. Compară instant taxele, veniturile nete și alege cea mai eficientă formă de organizare pentru 2026.',
+  keywords: 'calculator pfa 2026, simulator srl, taxe microintreprindere, impozit profit vs venit, calculator taxe romania, sistem real vs norma, salariu net pfa',
+  openGraph: {
+    title: 'Simulator Fiscal 2026 - PFA vs SRL vs MICRO',
+    description: 'Află exact câți bani îți rămân în mână. Compară taxele pentru PFA, Micro și Profit.',
+    images: ['/og-image.png'],
+    type: 'website'
+  },
+  alternates: {
+    canonical: 'https://simulator-fiscal.romania', // Placeholder, user can update
+  }
+};
 
 /**
  * HOME PAGE
@@ -65,9 +81,9 @@ export default function Home() {
             {/* Description */}
             <p className="text-base md:text-lg lg:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed relative z-10">
               Compară instant costurile între{" "}
-              <strong className="text-slate-200">CIM</strong>,{" "}
-              <strong className="text-slate-200">PFA</strong> și{" "}
-              <strong className="text-slate-200">SRL</strong>.
+              <strong className="text-slate-200">PFA</strong>,{" "}
+              <strong className="text-slate-200">SRL</strong> și{" "}
+              <strong className="text-slate-200">MICRO</strong>.
               Află care variantă este cea mai eficientă pentru situația ta.
             </p>
           </header>
@@ -85,27 +101,27 @@ export default function Home() {
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               <InfoCard
-                icon={<BuildingIcon />}
-                iconBg="bg-blue-900/30"
-                iconColor="text-blue-400"
-                title="CIM – Angajat"
-                description="Contract Individual de Muncă. Include CAS (25%), CASS (10%) și impozit pe venit (10%) cu deducere personală aplicabilă."
-              />
-
-              <InfoCard
                 icon={<UserIcon />}
                 iconBg="bg-emerald-900/30"
                 iconColor="text-emerald-400"
-                title="PFA – Freelancer"
-                description="Persoană Fizică Autorizată în sistem real. Contribuții plafonate la multiplii salariului minim pe economie."
+                title="PFA – Sistem Real"
+                description="Persoană Fizică Autorizată. Contribuții (CAS, CASS) plafonate la 12/24/60 salarii minime, în funcție de venit."
               />
 
               <InfoCard
                 icon={<BuildingOfficeIcon />}
                 iconBg="bg-purple-900/30"
                 iconColor="text-purple-400"
-                title="SRL – Microîntreprindere"
-                description="Impozit pe cifra de afaceri (1-3%) plus impozit pe dividende (8%) și CASS pe dividende (10% plafonat)."
+                title="Microîntreprindere"
+                description="Impozit pe venit (1% sau 3%) + 8% impozit pe dividende. Necesită minim un angajat pentru cota de 1%."
+              />
+
+              <InfoCard
+                icon={<BuildingIcon />}
+                iconBg="bg-blue-900/30"
+                iconColor="text-blue-400"
+                title="SRL – Profit 16%"
+                description="Impozit de 16% pe profitul net. Variantă optimă pentru cheltuieli mari sau când nu îndeplinești condițiile Micro."
               />
             </div>
           </section>
