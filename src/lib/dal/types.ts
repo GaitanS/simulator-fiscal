@@ -69,6 +69,8 @@ export interface SRLRates {
 export interface FiscalConstants {
   /** Salariul minim brut în RON (2026) */
   readonly MINIMUM_WAGE: number;
+  /** Salariul minim brut iulie 2026 */
+  readonly MINIMUM_WAGE_JULY_2026: number;
   /** Curs valutar EUR/RON fix */
   readonly EUR_RON_RATE: number;
 }
