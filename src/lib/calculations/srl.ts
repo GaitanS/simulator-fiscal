@@ -7,7 +7,7 @@
  * 2. Scad Taxa Micro (1% sau 3%)
  * 3. Scad cost contabil/diverse (opțional, 0 aici)
  * 4. Ramane Profit Brut
- * 5. Scad Impozit Dividende (8%)
+ * 5. Scad Impozit Dividende (16%)
  * 6. Scad CASS pe dividende (daca e cazul)
  */
 import { TAX_RATES } from '../config/taxConfig';
@@ -78,7 +78,7 @@ export function calculateSRL(
     // --- 3. CASS ON DIVIDENDS ---
     // Capped annually at 6/12/24 salaries
     // We estimate monthly impact
-    const annualDividends = netDividends * 12; // Estimation
+    const annualDividends = availableForDividends * 12; // Estimation based on Gross Dividends
     let annualCassBase = 0;
 
     if (annualDividends >= 24 * MINIMUM_WAGE) {
