@@ -34,6 +34,8 @@ export function FreelanceComparison() {
         isHandicapped: false,
         reinvestedProfit: 0,
         deductibleProvisions: 0,
+        expenses: 0, // Monthly expenses for Profit regime
+        expensesInput: '', // Display value for expenses
         // Helper-specific fields
         provisionBaseAmount: '',
         provisionType: '270_DAYS' as '270_DAYS' | 'BANKRUPTCY',
@@ -206,6 +208,35 @@ export function FreelanceComparison() {
                                 </div>
                                 <p className="text-[10px] text-slate-500 italic text-center">
                                     Impozit dividende: {fiscalYear === 2025 ? '10%' : '16%'} | Salariu minim: {fiscalYear === 2025 ? '4.050' : '4.325'} RON
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Expenses Field for Profit Calculation */}
+                        <div className="grid grid-cols-1 gap-6">
+                            <div className="space-y-3 flex flex-col">
+                                <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                                    Cheltuieli {period === 'ANNUAL' ? 'Anuale' : 'Lunare'} (pentru SRL Profit)
+                                </Label>
+                                <InputField
+                                    id="expenses-input"
+                                    value={options.expensesInput}
+                                    onChange={(val) => {
+                                        const num = parseFloat(val.replace(/[^0-9.]/g, '')) || 0;
+                                        const monthlyValue = period === 'ANNUAL' ? num / 12 : num;
+                                        setOptions(prev => ({
+                                            ...prev,
+                                            expensesInput: val,
+                                            expenses: monthlyValue,
+                                            deductibleProvisions: monthlyValue // Use expenses for profit calc
+                                        }));
+                                    }}
+                                    currency={currency}
+                                    variant="compact"
+                                    placeholder="Ex: 3.000"
+                                />
+                                <p className="text-[10px] text-slate-500 italic">
+                                    La SRL Profit: Impozit 16% se aplică pe Profit (Venituri - Cheltuieli)
                                 </p>
                             </div>
                         </div>
