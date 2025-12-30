@@ -197,6 +197,8 @@ export interface CalculationInput {
   currency: Currency;
   /** Scenariul fiscal */
   scenario: ScenarioType;
+  /** Anul fiscal (2025 sau 2026) */
+  fiscalYear?: 2025 | 2026;
   /** Cifra de afaceri anuală (pentru SRL) */
   annualRevenue?: number;
   /** SRL: Are angajat? (Micro vs Profit) */

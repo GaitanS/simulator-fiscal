@@ -9,7 +9,7 @@
  * @module lib/dal
  */
 
-import { TAX_RATES } from '../config/taxConfig';
+import { TAX_RATES, getTaxRatesForYear, type FiscalYear } from '../config/taxConfig';
 import {
     CalculationInputSchema,
     ComparisonInputSchema,
@@ -268,7 +268,8 @@ class FiscalDataAccessLayer {
         annualRevenue?: number,
         hasEmployee: boolean = true,
         reinvestedProfit: number = 0,
-        deductibleProvisions: number = 0
+        deductibleProvisions: number = 0,
+        fiscalYear: FiscalYear = 2025
     ): SRLCalculationResult {
         const grossIncomeRON = currency === 'EUR'
             ? convertCurrency(grossIncome, 'EUR', 'RON', this.exchangeRate)
@@ -294,7 +295,8 @@ class FiscalDataAccessLayer {
             hasEmployee,
             this.exchangeRate,
             reinvestedProfitRON,
-            deductibleProvisionsRON
+            deductibleProvisionsRON,
+            fiscalYear
         );
 
         if (currency === 'EUR') {
@@ -365,6 +367,7 @@ class FiscalDataAccessLayer {
             isHandicapped?: boolean;
             reinvestedProfit?: number;
             deductibleProvisions?: number;
+            fiscalYear?: FiscalYear;
         }
     ): FreelanceComparisonResult {
         // Validate with Freelance schema
@@ -389,12 +392,17 @@ class FiscalDataAccessLayer {
             options?.isHandicapped
         );
 
+        const fiscalYear = options?.fiscalYear ?? 2025;
+
         // Calculate SRL Micro (Assume has employee = true)
         const micro = this.calculateSRL(
             grossIncome,
             currency,
             undefined,
-            true // Enforce Micro logic
+            true, // Enforce Micro logic
+            0,
+            0,
+            fiscalYear
         );
 
         // Calculate SRL Profit (Assume has employee = false)
@@ -403,8 +411,9 @@ class FiscalDataAccessLayer {
             currency,
             undefined,
             false, // Enforce Profit logic
-            options?.reinvestedProfit,
-            options?.deductibleProvisions
+            options?.reinvestedProfit ?? 0,
+            options?.deductibleProvisions ?? 0,
+            fiscalYear
         );
 
         // Find optimal among these 3

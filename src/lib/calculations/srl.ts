@@ -7,10 +7,10 @@
  * 2. Scad Taxa Micro (1% sau 3%)
  * 3. Scad cost contabil/diverse (opțional, 0 aici)
  * 4. Ramane Profit Brut
- * 5. Scad Impozit Dividende (16%)
+ * 5. Scad Impozit Dividende (8%, 10% sau 16% în funcție de an)
  * 6. Scad CASS pe dividende (daca e cazul)
  */
-import { TAX_RATES } from '../config/taxConfig';
+import { getTaxRatesForYear, type FiscalYear } from '../config/taxConfig';
 import type { CalculationResult } from '../dal/types';
 
 export function calculateSRL(
@@ -19,8 +19,11 @@ export function calculateSRL(
     hasEmployee: boolean = true,
     exchangeRate: number = 5.0,
     reinvestedProfit: number = 0,
-    deductibleProvisions: number = 0
+    deductibleProvisions: number = 0,
+    fiscalYear: FiscalYear = 2025
 ): CalculationResult {
+    const TAX_RATES = getTaxRatesForYear(fiscalYear);
+
     const {
         MICRO_TAX_LOW,
         MICRO_TAX_HIGH,

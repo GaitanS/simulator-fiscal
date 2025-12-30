@@ -6,7 +6,7 @@ import { fiscalDAL } from '@/lib/dal';
 import { InputField } from './InputField';
 import { CurrencyToggle } from './CurrencyToggle';
 import type { Currency, FreelanceComparisonResult } from '@/lib/dal/types';
-import { TAX_RATES } from '@/lib/config/taxConfig';
+import { TAX_RATES, getTaxRatesForYear, type FiscalYear } from '@/lib/config/taxConfig';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { Checkbox } from "@/components/ui/checkbox";
@@ -26,6 +26,7 @@ export function FreelanceComparison() {
 
     // Smart Options
     const [period, setPeriod] = useState<'MONTHLY' | 'ANNUAL'>('MONTHLY');
+    const [fiscalYear, setFiscalYear] = useState<FiscalYear>(2025);
     const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
     const [isOptimizationOpen, setIsOptimizationOpen] = useState(false);
     const [options, setOptions] = useState({
@@ -99,12 +100,12 @@ export function FreelanceComparison() {
     const comparison = useMemo<FreelanceComparisonResult | null>(() => {
         try {
             if (grossIncome <= 0) return null;
-            return fiscalDAL.compareFreelance(grossIncome, currency, options);
+            return fiscalDAL.compareFreelance(grossIncome, currency, { ...options, fiscalYear });
         } catch (error) {
             console.error(error);
             return null;
         }
-    }, [grossIncome, currency, options]);
+    }, [grossIncome, currency, options, fiscalYear]);
 
     return (
         <div className="w-full max-w-7xl mx-auto space-y-12 px-4 md:px-8">
@@ -176,6 +177,36 @@ export function FreelanceComparison() {
                                 <div className="h-full">
                                     <CurrencyToggle value={currency} onChange={handleCurrencyChange} className="w-full h-full max-h-[58px]" />
                                 </div>
+                            </div>
+                        </div>
+
+                        {/* Fiscal Year Toggle */}
+                        <div className="grid grid-cols-1 gap-6">
+                            <div className="space-y-3 flex flex-col">
+                                <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">An Fiscal</Label>
+                                <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 h-full max-h-[58px]">
+                                    <button
+                                        onClick={() => setFiscalYear(2025)}
+                                        className={cn(
+                                            "flex-1 px-4 py-2.5 md:py-3 rounded-lg font-semibold text-sm md:text-base transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500",
+                                            fiscalYear === 2025 ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20" : "text-slate-400 hover:text-white hover:bg-white/10"
+                                        )}
+                                    >
+                                        2025 (10%)
+                                    </button>
+                                    <button
+                                        onClick={() => setFiscalYear(2026)}
+                                        className={cn(
+                                            "flex-1 px-4 py-2.5 md:py-3 rounded-lg font-semibold text-sm md:text-base transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500",
+                                            fiscalYear === 2026 ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20" : "text-slate-400 hover:text-white hover:bg-white/10"
+                                        )}
+                                    >
+                                        2026 (16%)
+                                    </button>
+                                </div>
+                                <p className="text-[10px] text-slate-500 italic text-center">
+                                    Impozit dividende: {fiscalYear === 2025 ? '10%' : '16%'} | Salariu minim: {fiscalYear === 2025 ? '4.050' : '4.325'} RON
+                                </p>
                             </div>
                         </div>
 
