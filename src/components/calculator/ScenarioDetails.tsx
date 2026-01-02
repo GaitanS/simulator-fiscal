@@ -187,9 +187,9 @@ function PFABreakdownItems({ breakdown, currency }: { breakdown: PFABreakdown; c
 function SRLBreakdownItems({ breakdown, currency }: { breakdown: SRLBreakdown; currency: Currency }) {
     return (
         <>
-            <BreakdownRow label="Impozit Micro" value={breakdown.microTax} percentage={`${(breakdown.microTaxRate * 100).toFixed(0)}%`} currency={currency} note="din CA" />
+            <BreakdownRow label="Impozit Micro" value={breakdown.microTax} percentage={`${((breakdown.microTaxRate ?? 0) * 100).toFixed(0)}%`} currency={currency} note="din CA" />
             <BreakdownRow label="Impozit Dividende" value={breakdown.dividendTax} percentage="16%" currency={currency} />
-            <BreakdownRow label="CASS Dividende" value={breakdown.cassDividend} percentage="10%" currency={currency} capped={breakdown.cassDividendCapped} />
+            <BreakdownRow label="CASS Dividende" value={breakdown.cassDividend ?? 0} percentage="10%" currency={currency} capped={breakdown.cassDividendCapped} />
         </>
     );
 }
