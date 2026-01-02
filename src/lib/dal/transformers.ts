@@ -12,6 +12,7 @@ import type {
     Currency,
     CalculationResult,
     ChartDataPoint,
+    CIMBreakdown,
     CIMCalculationResult,
     PFACalculationResult,
     SRLCalculationResult,
@@ -104,12 +105,14 @@ export function transformBreakdownCurrency(
     // Handle each breakdown type
     if ('personalDeduction' in breakdown) {
         // CIM breakdown
-        const cimBreakdown = breakdown as { cas: number; cass: number; incomeTax: number; personalDeduction: number; cam: number; completeSalary: number };
+        const cimBreakdown = breakdown as CIMBreakdown;
         return Object.freeze({
             cas: convert(cimBreakdown.cas),
             cass: convert(cimBreakdown.cass),
             incomeTax: convert(cimBreakdown.incomeTax),
             personalDeduction: convert(cimBreakdown.personalDeduction),
+            baseDeduction: convert(cimBreakdown.baseDeduction),
+            supplementaryDeduction: convert(cimBreakdown.supplementaryDeduction),
             cam: convert(cimBreakdown.cam),
             completeSalary: convert(cimBreakdown.completeSalary)
         });
