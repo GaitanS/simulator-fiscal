@@ -133,7 +133,7 @@ export function SalaryCalculator() {
                                         value={inputValue}
                                         onChange={handleInputChange}
                                         currency={currency}
-                                        variant="large" // Assuming InputField supports a larger variant, if not it falls back
+                                        variant="main" // Fixed type error (was "large")
                                         className="text-center text-3xl md:text-4xl font-black py-4 border-0 shadow-none focus-visible:ring-0 bg-transparent"
                                     />
                                 </div>
