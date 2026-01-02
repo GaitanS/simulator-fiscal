@@ -20,10 +20,17 @@ export function SalaryCalculator() {
     const inputId = useId();
 
     // State
-    const [inputValue, setInputValue] = useState<string>('5000');
-    const [grossIncome, setGrossIncome] = useState<number>(5000);
+    const [inputValue, setInputValue] = useState<string>('60000');
+    const [grossIncome, setGrossIncome] = useState<number>(60000);
     const [currency, setCurrency] = useState<Currency>('RON');
     const [fiscalPeriod, setFiscalPeriod] = useState<'JAN' | 'JUL'>('JAN');
+
+    // Deduction options
+    const [options, setOptions] = useState({
+        dependentsCount: 0 as 0 | 1 | 2 | 3 | 4,
+        isUnder26: false,
+        childrenInSchoolCount: 0
+    });
 
     // Debounce
     const debouncedSetIncome = useDebouncedCallback((value: number) => {
@@ -52,11 +59,11 @@ export function SalaryCalculator() {
         try {
             if (grossIncome <= 0) return null;
             const minWageOverride = fiscalPeriod === 'JUL' ? TAX_RATES.CONSTANTS.MINIMUM_WAGE_JULY_2026 : undefined;
-            return fiscalDAL.calculateCIM(grossIncome, currency, minWageOverride);
+            return fiscalDAL.calculateCIM(grossIncome, currency, minWageOverride, options, 'ANNUAL');
         } catch (error) {
             return null;
         }
-    }, [grossIncome, currency]);
+    }, [grossIncome, currency, options, fiscalPeriod]);
 
     return (
         <div className="w-full max-w-4xl mx-auto space-y-8">
@@ -73,8 +80,8 @@ export function SalaryCalculator() {
                     <button
                         onClick={() => setFiscalPeriod('JAN')}
                         className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${fiscalPeriod === 'JAN'
-                                ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm'
-                                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                            ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                            : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                             }`}
                     >
                         Ian - Iun 2026 (4.050 lei)
@@ -82,8 +89,8 @@ export function SalaryCalculator() {
                     <button
                         onClick={() => setFiscalPeriod('JUL')}
                         className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${fiscalPeriod === 'JUL'
-                                ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm'
-                                : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                            ? 'bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                            : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                             }`}
                     >
                         Iul - Dec 2026 (4.325 lei)
@@ -97,7 +104,8 @@ export function SalaryCalculator() {
                     <div className="flex flex-col items-center gap-6">
                         <div className="w-full max-w-sm space-y-4">
                             <label htmlFor={inputId} className="block text-sm font-medium text-center text-slate-700 dark:text-slate-300">
-                                Salariu Brut Lunar
+                                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse inline-block mr-2"></span>
+                                Venituri Totale (Salar Brut Anual)
                             </label>
                             <InputField
                                 id={inputId}
@@ -106,6 +114,53 @@ export function SalaryCalculator() {
                                 currency={currency}
                             />
                             <CurrencyToggle value={currency} onChange={handleCurrencyChange} />
+                        </div>
+
+                        {/* Extra Options for Deductions */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full pt-4 border-t border-slate-100 dark:border-slate-800">
+                            <div className="space-y-2">
+                                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Persoane în întreținere</label>
+                                <select
+                                    value={options.dependentsCount}
+                                    onChange={(e) => setOptions(prev => ({ ...prev, dependentsCount: parseInt(e.target.value) as any }))}
+                                    className="w-full h-10 px-3 rounded-lg bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                >
+                                    <option value={0}>Fără persoane</option>
+                                    <option value={1}>1 persoană</option>
+                                    <option value={2}>2 persoane</option>
+                                    <option value={3}>3 persoane</option>
+                                    <option value={4}>4 sau mai multe</option>
+                                </select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Vârsta sub 26 ani</label>
+                                <div className="flex items-center h-10 px-3 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700">
+                                    <input
+                                        type="checkbox"
+                                        checked={options.isUnder26}
+                                        onChange={(e) => setOptions(prev => ({ ...prev, isUnder26: e.target.checked }))}
+                                        className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 focus:ring-offset-0"
+                                    />
+                                    <span className="ml-2 text-sm text-slate-600 dark:text-slate-400">Beneficiază de deducere</span>
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Copii la școală</label>
+                                <div className="flex bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 h-10 overflow-hidden">
+                                    <button
+                                        onClick={() => setOptions(prev => ({ ...prev, childrenInSchoolCount: Math.max(0, prev.childrenInSchoolCount - 1) }))}
+                                        className="px-3 hover:bg-slate-100 dark:hover:bg-slate-800 border-r border-slate-200 dark:border-slate-700"
+                                    >-</button>
+                                    <div className="flex-1 flex items-center justify-center text-sm font-medium">{options.childrenInSchoolCount}</div>
+                                    <button
+                                        onClick={() => setOptions(prev => ({ ...prev, childrenInSchoolCount: prev.childrenInSchoolCount + 1 }))}
+                                        className="px-3 hover:bg-slate-100 dark:hover:bg-slate-800 border-l border-slate-200 dark:border-slate-700"
+                                    >+</button>
+                                </div>
+                                <p className="text-[10px] text-slate-400 italic">100 RON / copil deducere</p>
+                            </div>
                         </div>
                     </div>
 
@@ -165,7 +220,7 @@ export function SalaryCalculator() {
                                         </div>
 
                                         <p className="text-xs text-center text-slate-400 mt-2">
-                                            Aceasta este suma pe care o primești &quot;în mână&quot;.
+                                            Aceasta este suma pe care o primești &quot;în mână&quot; anual.
                                         </p>
 
                                         {result.breakdown.cam > 0 && (

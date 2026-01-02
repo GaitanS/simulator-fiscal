@@ -99,6 +99,8 @@ export interface CIMBreakdown {
   readonly personalDeduction: number;
   /** Costuri Angajator */
   readonly cam: number;
+  readonly baseDeduction: number;
+  readonly supplementaryDeduction: number;
   readonly completeSalary: number;
 }
 
@@ -212,6 +214,12 @@ export interface CalculationInput {
   reinvestedProfit?: number;
   /** SRL: Provizioane deductibile (scade baza impozabilă) */
   deductibleProvisions?: number;
+  /** CIM: Persons in care */
+  dependentsCount?: 0 | 1 | 2 | 3 | 4;
+  /** CIM: If under 26 */
+  isUnder26?: boolean;
+  /** CIM: Children in school */
+  childrenInSchoolCount?: number;
 }
 
 /**

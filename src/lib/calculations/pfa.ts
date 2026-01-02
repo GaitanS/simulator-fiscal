@@ -8,17 +8,13 @@ import type { CalculationResult } from '../dal/types';
 export function calculatePFA(
     grossIncome: number,
     isPensioner: boolean = false,
-    isHandicapped: boolean = false
+    isHandicapped: boolean = false,
+    period: 'MONTHLY' | 'ANNUAL' = 'ANNUAL'
 ): CalculationResult {
     const { CAS, CASS, INCOME_TAX, CAS_CAP_LOW, CAS_CAP_HIGH, CASS_CAPS } = TAX_RATES.PFA;
     const { MINIMUM_WAGE } = TAX_RATES.CONSTANTS;
 
-    // Venit anual estimat (gross * 12 pentru plafoane anuale)
-    // Dar simulatorul e lunar. Vom raporta plafoanele la luna pentru simplificare,
-    // sau consideram gross ca anual / 12.
-    // Conventie: Inputul e lunar. Plafoanele se calculeaza anual si se impart la 12.
-
-    const annualGross = grossIncome * 12;
+    const annualGross = period === 'ANNUAL' ? grossIncome : grossIncome * 12;
     const minWageAnnual = MINIMUM_WAGE * 12;
 
     // --- CAS (Pensie) ---
@@ -37,7 +33,7 @@ export function calculatePFA(
     }
 
     const annualCas = casBase * CAS;
-    const monthlyCas = annualCas / 12;
+    const casContribution = period === 'ANNUAL' ? annualCas : (annualCas / 12);
     const casCapped = casBase > 0;
 
     // --- CASS (Sanatate) ---
@@ -59,27 +55,22 @@ export function calculatePFA(
     }
 
     const annualCass = cassBase * CASS;
-    const monthlyCass = annualCass / 12;
+    const cassContribution = period === 'ANNUAL' ? annualCass : (annualCass / 12);
     const cassCapped = annualGross > (CASS_CAPS[3] * MINIMUM_WAGE);
 
-    // --- Impozit pe Venit ---
-    // (Brut - CAS - CASS) * 10%
-    // Atentie: CAS-ul deductibil este cel efectiv platit.
-    // CASS-ul este deductibil limitat sau integral? In sistem real, CASS este deductibil.
-
-    const taxableBase = Math.max(0, grossIncome - monthlyCas - monthlyCass);
+    const taxableBase = Math.max(0, (period === 'ANNUAL' ? grossIncome : grossIncome) - casContribution - cassContribution);
     const incomeTax = isHandicapped ? 0 : (taxableBase * INCOME_TAX);
 
-    const totalTaxes = monthlyCas + monthlyCass + incomeTax;
-    const net = grossIncome - totalTaxes;
+    const totalTaxes = casContribution + cassContribution + incomeTax;
+    const net = (period === 'ANNUAL' ? grossIncome : grossIncome) - totalTaxes;
 
     return Object.freeze({
         gross: grossIncome,
         net: Math.round(net * 100) / 100,
         totalTaxes: Math.round(totalTaxes * 100) / 100,
         breakdown: Object.freeze({
-            cas: Math.round(monthlyCas * 100) / 100,
-            cass: Math.round(monthlyCass * 100) / 100,
+            cas: Math.round(casContribution * 100) / 100,
+            cass: Math.round(cassContribution * 100) / 100,
             incomeTax: Math.round(incomeTax * 100) / 100,
             casCapped,
             cassCapped

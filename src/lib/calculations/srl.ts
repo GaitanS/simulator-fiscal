@@ -20,7 +20,8 @@ export function calculateSRL(
     exchangeRate: number = 5.0,
     reinvestedProfit: number = 0,
     deductibleProvisions: number = 0,
-    fiscalYear: FiscalYear = 2025
+    fiscalYear: FiscalYear = 2025,
+    period: 'MONTHLY' | 'ANNUAL' = 'ANNUAL'
 ): CalculationResult {
     const TAX_RATES = getTaxRatesForYear(fiscalYear);
 
@@ -41,20 +42,19 @@ export function calculateSRL(
 
     if (hasEmployee) {
         // MICRO REGIME
-        // Taxa: 1% (< 60k EUR) sau 3% (> 60k EUR)
-        const estimatedAnnual = annualRevenue || (grossIncome * 12);
+        // Taxation: 1% (< 60k EUR) or 3% (> 60k EUR)
+        const estimatedAnnual = period === 'ANNUAL' ? grossIncome : (annualRevenue || (grossIncome * 12));
         // Use dynamic exchange rate for threshold
         const thresholdRON = REVENUE_THRESHOLD * exchangeRate;
         corporateMicroRate = estimatedAnnual > thresholdRON ? MICRO_TAX_HIGH : MICRO_TAX_LOW;
         corporateTax = grossIncome * corporateMicroRate;
 
-        // Mandatory Employee Cost (Min Wage 3700 RON)
+        // Mandatory Employee Cost (Min Wage 4050 RON for 2025 context in user screenshot)
         // Cost Firma = Brut + CAM
-        // Total Taxe Salariale = CAS + CASS + IV + CAM
-        // Noi deducem COSTUL TOTAL suportat de firma pentru a afla profitul brut
-        const salaryGross = 3700;
-        const SalaryCAM = salaryGross * 0.0225; // 83.25
-        employeeTotalCost = salaryGross + SalaryCAM; // ~3783
+        const salaryGross = MINIMUM_WAGE; // Use MIN wage from config
+        const SalaryCAM = salaryGross * 0.0225;
+        const monthlyTotalCost = salaryGross + SalaryCAM;
+        employeeTotalCost = period === 'ANNUAL' ? monthlyTotalCost * 12 : monthlyTotalCost;
     } else {
         // PROFIT TAX REGIME (16%)
         // Base = Gross - Expenses (Provisions)
@@ -80,8 +80,7 @@ export function calculateSRL(
 
     // --- 3. CASS ON DIVIDENDS ---
     // Capped annually at 6/12/24 salaries
-    // We estimate monthly impact
-    const annualDividends = availableForDividends * 12; // Estimation based on Gross Dividends
+    const annualDividends = period === 'ANNUAL' ? availableForDividends : (availableForDividends * 12);
     let annualCassBase = 0;
 
     if (annualDividends >= 24 * MINIMUM_WAGE) {
@@ -93,7 +92,7 @@ export function calculateSRL(
     }
 
     const annualCass = annualCassBase * CASS_ON_DIVIDENDS;
-    const monthlyCass = annualCass / 12;
+    const cassContribution = period === 'ANNUAL' ? annualCass : (annualCass / 12);
 
     // --- 4. TOTALS ---
     // Net Income = Net Dividends - Monthly CASS
@@ -127,14 +126,16 @@ export function calculateSRL(
     // Let's add it to NET but show in breakdown.
 
     let netSalary = 0;
+    let salaryTaxes = 0;
     if (hasEmployee) {
-        // Approx Net for 3700
-        // CAS 925, CASS 370, Ded 300 -> TaxBase 2105 -> Imp 210
-        // Net = 3700 - 925 - 370 - 210 = 2195.
-        netSalary = 2195;
+        // Use internal CIM calculator for consistency
+        const { calculateCIM } = require('./cim');
+        const cimResult = calculateCIM(MINIMUM_WAGE, MINIMUM_WAGE);
+        netSalary = period === 'ANNUAL' ? cimResult.net * 12 : cimResult.net;
+        salaryTaxes = period === 'ANNUAL' ? cimResult.totalTaxes * 12 : cimResult.totalTaxes;
     }
 
-    const totalNet = (netDividends - monthlyCass) + netSalary;
+    const totalNet = (netDividends - cassContribution) + netSalary;
 
     // Total Taxes = Corporate + EmployeeTaxes(Full) + DivTax + DivCASS?
     // Or just taxes paid?
@@ -144,8 +145,7 @@ export function calculateSRL(
     // Total "Taxes" shown in chart usually means "Money that went to State".
     // State gets: CorpTax + CAM + CAS + CASS + IV + DivTax + DivCASS.
 
-    const salaryTaxes = hasEmployee ? (1588) : 0; // CAS+CASS+IV+CAM (approx 83+925+370+210)
-    const totalTaxes = corporateTax + salaryTaxes + dividendTax + monthlyCass;
+    const totalTaxes = corporateTax + salaryTaxes + dividendTax + cassContribution;
 
     return Object.freeze({
         gross: grossIncome,
@@ -155,7 +155,7 @@ export function calculateSRL(
             microTax: Math.round(corporateTax * 100) / 100,
             microTaxRate: hasEmployee ? corporateMicroRate : 0.16,
             dividendTax: Math.round(dividendTax * 100) / 100,
-            cassDividend: Math.round(monthlyCass * 100) / 100,
+            cassDividend: Math.round(cassContribution * 100) / 100,
             cassDividendCapped: annualCassBase > 0
         }),
         scenario: 'SRL'

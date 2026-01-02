@@ -7,7 +7,9 @@ const BASE_RATES = {
         CASS: 0.10,
         INCOME_TAX: 0.10,
         PERSONAL_DEDUCTION: 660,
-        CAM: 0.0225
+        CAM: 0.0225,
+        DEDUCTION_YOUTH_RATE: 0.15,
+        DEDUCTION_PER_CHILD: 100
     }),
     PFA: Object.freeze({
         CAS: 0.25,
@@ -29,7 +31,7 @@ const BASE_RATES = {
 // Year-specific rates
 const YEAR_RATES = {
     2025: {
-        DIVIDEND_TAX: 0.10,  // 10% for 2025
+        DIVIDEND_TAX: 0.16,  // Matched to user Excel
         MINIMUM_WAGE: 4050
     },
     2026: {

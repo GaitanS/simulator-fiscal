@@ -229,31 +229,71 @@ class FiscalDataAccessLayer {
     /**
      * Calculate a specific scenario (type-safe version)
      */
-    public calculateCIM(grossIncome: number, currency: Currency = 'RON', minWageOverride?: number): CIMCalculationResult {
+    public calculateCIM(
+        grossIncome: number,
+        currency: Currency = 'RON',
+        minWageOverride?: number,
+        options?: {
+            dependentsCount?: number;
+            isUnder26?: boolean;
+            childrenInSchoolCount?: number;
+        },
+        period: 'MONTHLY' | 'ANNUAL' = 'ANNUAL'
+    ): CIMCalculationResult {
         const grossIncomeRON = currency === 'EUR'
             ? convertCurrency(grossIncome, 'EUR', 'RON', this.exchangeRate)
             : grossIncome;
 
-        const result = calculateCIM(grossIncomeRON);
+        // If annual, calculate on monthly and multiply?
+        // Actually Article 77 is monthly based.
+        const monthlyGross = period === 'ANNUAL' ? grossIncomeRON / 12 : grossIncomeRON;
 
-        if (currency === 'EUR') {
-            return transformResultCurrency(result, 'EUR', 'RON', this.exchangeRate) as CIMCalculationResult;
+        const monthlyResult = calculateCIM(monthlyGross, minWageOverride, options);
+
+        if (period === 'ANNUAL') {
+            const annualResult = {
+                ...monthlyResult,
+                gross: monthlyResult.gross * 12,
+                net: monthlyResult.net * 12,
+                totalTaxes: monthlyResult.totalTaxes * 12,
+                breakdown: {
+                    ...monthlyResult.breakdown,
+                    cas: monthlyResult.breakdown.cas * 12,
+                    cass: monthlyResult.breakdown.cass * 12,
+                    incomeTax: monthlyResult.breakdown.incomeTax * 12,
+                    personalDeduction: monthlyResult.breakdown.personalDeduction * 12,
+                    baseDeduction: monthlyResult.breakdown.baseDeduction * 12,
+                    supplementaryDeduction: monthlyResult.breakdown.supplementaryDeduction * 12,
+                    cam: monthlyResult.breakdown.cam * 12,
+                    completeSalary: monthlyResult.breakdown.completeSalary * 12
+                }
+            };
+
+            if (currency === 'EUR') {
+                return transformResultCurrency(annualResult, 'EUR', 'RON', this.exchangeRate) as CIMCalculationResult;
+            }
+            return annualResult as CIMCalculationResult;
         }
 
-        return result;
+        if (currency === 'EUR') {
+            return transformResultCurrency(monthlyResult, 'EUR', 'RON', this.exchangeRate) as CIMCalculationResult;
+        }
+
+        return monthlyResult;
     }
 
     public calculatePFA(
         grossIncome: number,
         currency: Currency = 'RON',
         isPensioner: boolean = false,
-        isHandicapped: boolean = false
+        isHandicapped: boolean = false,
+        period: 'MONTHLY' | 'ANNUAL' = 'ANNUAL'
     ): PFACalculationResult {
         const grossIncomeRON = currency === 'EUR'
             ? convertCurrency(grossIncome, 'EUR', 'RON', this.exchangeRate)
             : grossIncome;
 
-        const result = calculatePFA(grossIncomeRON, isPensioner, isHandicapped);
+        const result = calculatePFA(grossIncomeRON, isPensioner, isHandicapped, period);
 
         if (currency === 'EUR') {
             return transformResultCurrency(result, 'EUR', 'RON', this.exchangeRate) as PFACalculationResult;
@@ -269,7 +309,8 @@ class FiscalDataAccessLayer {
         hasEmployee: boolean = true,
         reinvestedProfit: number = 0,
         deductibleProvisions: number = 0,
-        fiscalYear: FiscalYear = 2025
+        fiscalYear: FiscalYear = 2025,
+        period: 'MONTHLY' | 'ANNUAL' = 'ANNUAL'
     ): SRLCalculationResult {
         const grossIncomeRON = currency === 'EUR'
             ? convertCurrency(grossIncome, 'EUR', 'RON', this.exchangeRate)
@@ -296,7 +337,8 @@ class FiscalDataAccessLayer {
             this.exchangeRate,
             reinvestedProfitRON,
             deductibleProvisionsRON,
-            fiscalYear
+            fiscalYear,
+            period
         );
 
         if (currency === 'EUR') {
@@ -368,6 +410,10 @@ class FiscalDataAccessLayer {
             reinvestedProfit?: number;
             deductibleProvisions?: number;
             fiscalYear?: FiscalYear;
+            isUnder26?: boolean;
+            dependentsCount?: number;
+            childrenInSchoolCount?: number;
+            period?: 'MONTHLY' | 'ANNUAL';
         }
     ): FreelanceComparisonResult {
         // Validate with Freelance schema
@@ -384,15 +430,17 @@ class FiscalDataAccessLayer {
             );
         }
 
+        const fiscalYear = options?.fiscalYear ?? 2025;
+        const period = options?.period ?? 'ANNUAL';
+
         // Calculate PFA (Standard or with exemptions)
         const pfa = this.calculatePFA(
             grossIncome,
             currency,
             options?.isPensioner,
-            options?.isHandicapped
+            options?.isHandicapped,
+            period
         );
-
-        const fiscalYear = options?.fiscalYear ?? 2025;
 
         // Calculate SRL Micro (Assume has employee = true)
         const micro = this.calculateSRL(
@@ -402,7 +450,8 @@ class FiscalDataAccessLayer {
             true, // Enforce Micro logic
             0,
             0,
-            fiscalYear
+            fiscalYear,
+            period
         );
 
         // Calculate SRL Profit (Assume has employee = false)
@@ -413,7 +462,8 @@ class FiscalDataAccessLayer {
             false, // Enforce Profit logic
             options?.reinvestedProfit ?? 0,
             options?.deductibleProvisions ?? 0,
-            fiscalYear
+            fiscalYear,
+            period
         );
 
         // Find optimal among these 3
