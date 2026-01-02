@@ -79,7 +79,9 @@ export function calculatePFA(
             cheltuieli: expenses,
             netIncome: netIncome,
             cas: cas,
+            casCapped: cas > 0, // CAS is always at a tier (cap) if paid
             cass: cass,
+            cassCapped: cassBase >= maxCassCap * MINIMUM_WAGE,
             incomeTax: incomeTax
         }
     };
