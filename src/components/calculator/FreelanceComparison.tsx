@@ -20,12 +20,12 @@ export function FreelanceComparison() {
     const inputId = useId();
 
     // State
-    const [inputValue, setInputValue] = useState<string>('10000');
-    const [grossIncome, setGrossIncome] = useState<number>(10000);
+    const [inputValue, setInputValue] = useState<string>('60000');
+    const [grossIncome, setGrossIncome] = useState<number>(60000);
     const [currency, setCurrency] = useState<Currency>('RON');
 
     // Smart Options
-    const [period, setPeriod] = useState<'MONTHLY' | 'ANNUAL'>('MONTHLY');
+    const [period, setPeriod] = useState<'MONTHLY' | 'ANNUAL'>('ANNUAL');
     const [fiscalYear, setFiscalYear] = useState<FiscalYear>(2025);
     const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
     const [isOptimizationOpen, setIsOptimizationOpen] = useState(false);
@@ -64,10 +64,9 @@ export function FreelanceComparison() {
     const handleCurrencyChange = useCallback((newCurrency: Currency) => {
         const convertedValue = fiscalDAL.convertCurrency(grossIncome, currency, newCurrency);
         setGrossIncome(convertedValue);
-        const displayValue = period === 'ANNUAL' ? convertedValue * 12 : convertedValue;
-        setInputValue(Math.round(displayValue).toString());
+        setInputValue(Math.round(convertedValue).toString());
         setCurrency(newCurrency);
-    }, [grossIncome, currency, period]);
+    }, [grossIncome, currency]);
 
     const handlePeriodChange = useCallback((newPeriod: 'MONTHLY' | 'ANNUAL') => {
         setPeriod(newPeriod);
@@ -93,10 +92,9 @@ export function FreelanceComparison() {
         setInputValue(value);
         const numericValue = parseFloat(value.replace(/[^0-9.]/g, ''));
         if (!isNaN(numericValue)) {
-            const monthlyValue = period === 'ANNUAL' ? numericValue / 12 : numericValue;
-            debouncedSetIncome(monthlyValue);
+            debouncedSetIncome(numericValue);
         }
-    }, [debouncedSetIncome, period]);
+    }, [debouncedSetIncome]);
 
     // Handlers for Advanced Options (Numeric)
     // No longer using handleOptionChange for these as they are handled inline with more complex logic
@@ -152,8 +150,8 @@ export function FreelanceComparison() {
                                 <div className="relative group">
                                     <InputField
                                         id="income-input"
-                                        value={incomeInput}
-                                        onChange={handleIncomeChange}
+                                        value={inputValue}
+                                        onChange={onInputChange}
                                         currency={currency}
                                         variant="premium"
                                         placeholder="Ex: 120.000"
@@ -283,6 +281,63 @@ export function FreelanceComparison() {
                                                     />
                                                 </div>
                                             ))}
+                                        </div>
+                                    </div>
+
+                                    {/* CIM Specific Deductions */}
+                                    <div className="space-y-4 pt-4 border-t border-white/5">
+                                        <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                            <div className="w-1 h-1 rounded-full bg-slate-500" />
+                                            Deduceri Specifice CIM (Contract Muncă)
+                                        </Label>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div className="space-y-3">
+                                                <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Persoane în întreținere</Label>
+                                                <select
+                                                    value={options.dependentsCount}
+                                                    onChange={(e) => setOptions(prev => ({ ...prev, dependentsCount: parseInt(e.target.value) as any }))}
+                                                    className="w-full h-11 px-4 rounded-xl bg-slate-900/50 border border-white/5 text-sm font-medium text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                                                >
+                                                    <option value={0}>Fără persoane</option>
+                                                    <option value={1}>1 persoană</option>
+                                                    <option value={2}>2 persoane</option>
+                                                    <option value={3}>3 persoane</option>
+                                                    <option value={4}>4 sau mai multe</option>
+                                                </select>
+                                            </div>
+
+                                            <div
+                                                onClick={() => setOptions(prev => ({ ...prev, isUnder26: !prev.isUnder26 }))}
+                                                className={cn(
+                                                    "flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer group mt-auto h-11",
+                                                    options.isUnder26
+                                                        ? "bg-blue-600/10 border-blue-500/50"
+                                                        : "bg-slate-900/50 border-white/5 hover:border-white/10"
+                                                )}
+                                            >
+                                                <span className="text-xs font-bold text-slate-300 group-hover:text-white transition-colors">Vârsta sub 26 ani</span>
+                                                <Checkbox
+                                                    checked={options.isUnder26}
+                                                    onCheckedChange={() => { }}
+                                                    className="border-white/20"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Copii la școală (100 RON / copil)</Label>
+                                            <div className="flex bg-slate-900/50 rounded-xl border border-white/5 h-11 overflow-hidden">
+                                                <button
+                                                    onClick={() => setOptions(prev => ({ ...prev, childrenInSchoolCount: Math.max(0, prev.childrenInSchoolCount - 1) }))}
+                                                    className="px-6 hover:bg-white/10 border-r border-white/5 text-slate-400 hover:text-white transition-colors"
+                                                >-</button>
+                                                <div className="flex-1 flex items-center justify-center text-sm font-bold text-white tracking-widest">{options.childrenInSchoolCount}</div>
+                                                <button
+                                                    onClick={() => setOptions(prev => ({ ...prev, childrenInSchoolCount: prev.childrenInSchoolCount + 1 }))}
+                                                    className="px-6 hover:bg-white/10 border-l border-white/5 text-slate-400 hover:text-white transition-colors"
+                                                >+</button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
