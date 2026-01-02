@@ -131,7 +131,7 @@ export function transformBreakdownCurrency(
             microTax: convert(breakdown.microTax),
             microTaxRate: breakdown.microTaxRate,
             dividendTax: convert(breakdown.dividendTax),
-            cassDividend: convert(breakdown.cassDividend),
+            cassDividend: convert(breakdown.cassDividend ?? 0),
             cassDividendCapped: breakdown.cassDividendCapped
         });
     }

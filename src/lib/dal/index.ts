@@ -195,8 +195,8 @@ class FiscalDataAccessLayer {
                 case 'PFA':
                     result = calculatePFA(
                         grossIncomeRON,
-                        isPensioner,
-                        isHandicapped
+                        'ANNUAL',
+                        { isPensioner }
                     );
                     break;
                 case 'SRL':
@@ -378,18 +378,20 @@ class FiscalDataAccessLayer {
 
         const cim = this.calculateCIM(grossIncome, currency);
 
-        // Updated PFA signature: gross, period, options
+        // Updated PFA signature: gross, currency, period, options
         const pfa = this.calculatePFA(
             grossIncome,
+            currency,
             'ANNUAL',
             { isPensioner: options?.isPensioner }
         );
 
-        // Updated SRL signature: gross, revenue, hasEmployee
+        // Updated SRL signature: gross, currency, annualRevenue, hasEmployee
         const srl = this.calculateSRL(
             grossIncome,
+            currency,
             0,
-            options?.hasEmployee
+            options?.hasEmployee ?? true
         );
 
         const { optimal, savings } = findOptimalScenario(cim, pfa, srl);
