@@ -20,8 +20,8 @@ export function FreelanceComparison() {
     const inputId = useId();
 
     // State
-    const [inputValue, setInputValue] = useState<string>('60000');
-    const [grossIncome, setGrossIncome] = useState<number>(60000);
+    const [inputValue, setInputValue] = useState<string>('100000');
+    const [grossIncome, setGrossIncome] = useState<number>(100000);
     const [currency, setCurrency] = useState<Currency>('RON');
 
     // Smart Options
@@ -53,13 +53,8 @@ export function FreelanceComparison() {
         }
     }, 150);
 
-    const handleInputChange = useCallback((value: string) => {
-        setInputValue(value);
-        const numericValue = parseFloat(value.replace(/[^0-9.]/g, ''));
-        if (!isNaN(numericValue)) {
-            debouncedSetIncome(numericValue);
-        }
-    }, [debouncedSetIncome]);
+    // Handlers
+    // Removing duplicate handleInputChange
 
     const handleCurrencyChange = useCallback((newCurrency: Currency) => {
         const convertedValue = fiscalDAL.convertCurrency(grossIncome, currency, newCurrency);
@@ -89,10 +84,21 @@ export function FreelanceComparison() {
 
     // Update debounced setter to handle period
     const onInputChange = useCallback((value: string) => {
+        // Allow formatting chars but keep underlying value clean
+        // Just set what user types
         setInputValue(value);
-        const numericValue = parseFloat(value.replace(/[^0-9.]/g, ''));
+
+        // Parse for calculation
+        // Allow dots/commas as decimal separators if needed, or just strip non-numeric
+        // Standardize: remove all non-digits, treat as integer for RON usually? 
+        // Or float? 
+        const cleanVal = value.replace(/[^0-9.]/g, '');
+        const numericValue = parseFloat(cleanVal);
+
         if (!isNaN(numericValue)) {
             debouncedSetIncome(numericValue);
+        } else if (value === '') {
+            debouncedSetIncome(0);
         }
     }, [debouncedSetIncome]);
 
@@ -115,7 +121,7 @@ export function FreelanceComparison() {
     }, [grossIncome, currency, options, fiscalYear]);
 
     return (
-        <div className="w-full max-w-7xl mx-auto space-y-12 px-4 md:px-8">
+        <div className="w-full max-w-7xl mx-auto space-y-12 px-4 md:px-8 pb-32">
 
             {/* Hero Section - Professional & Focused */}
             <div className="flex flex-col items-center gap-4 text-center max-w-3xl mx-auto">
@@ -138,79 +144,88 @@ export function FreelanceComparison() {
                     </div>
                     <CardContent className="p-8 space-y-8">
                         {/* Input Area */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-                            <div className="space-y-3">
-                                <Label
-                                    htmlFor="income-input"
-                                    className="select-none text-[10px] font-black uppercase tracking-[0.2em] text-blue-400 flex items-center gap-2"
+                        {/* Input Area - Symmetric & Centered */}
+                        <div className="flex flex-col items-center gap-6">
+                            <div className="flex flex-col md:flex-row gap-4 w-full items-end">
+                                <div className="flex-1 w-full space-y-2">
+                                    <Label
+                                        htmlFor="income-input"
+                                        className="select-none text-[10px] font-black uppercase tracking-[0.2em] text-blue-400 flex items-center gap-2"
+                                    >
+                                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                                        Venituri Totale (Anual)
+                                    </Label>
+                                    <div className="relative group">
+                                        <InputField
+                                            key="income-input-main"
+                                            id="income-input"
+                                            value={inputValue}
+                                            onChange={onInputChange}
+                                            currency={currency}
+                                            variant="main"
+                                            placeholder="Ex: 120.000"
+                                        />
+                                        <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-2xl blur opacity-10 group-focus-within:opacity-25 transition duration-500 pointer-events-none" />
+                                    </div>
+                                </div>
+
+                                <div className="w-full md:w-auto space-y-2">
+                                    <Label className="select-none text-[10px] font-black uppercase tracking-[0.2em] text-blue-400 flex items-center gap-2">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                                        Moneda
+                                    </Label>
+                                    <div className="h-14 md:h-16 min-w-[140px]">
+                                        <CurrencyToggle value={currency} onChange={handleCurrencyChange} className="w-full h-full" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p className="text-[10px] text-slate-500 italic -mt-2">
+                                Introdu venitul tău brut total pe an. Toate calculele sunt estimate pe baza acestui total anual.
+                            </p>
+                        </div>
+
+                        {/* Fiscal Year Toggle - Full Width & Symmetric */}
+                        <div className="space-y-3">
+                            <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest pl-1">An Fiscal</Label>
+                            <div className="flex bg-slate-900/50 p-1 rounded-xl border border-white/10 w-full relative">
+                                <button
+                                    onClick={() => setFiscalYear(2025)}
+                                    className={cn(
+                                        "flex-1 px-4 py-3 rounded-lg font-bold text-sm transition-all duration-300 relative z-10",
+                                        fiscalYear === 2025 ? "text-white" : "text-slate-400 hover:text-white"
+                                    )}
                                 >
-                                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
-                                    Venituri Totale (Anual)
-                                </Label>
-                                <div className="relative group">
-                                    <InputField
-                                        id="income-input"
-                                        value={inputValue}
-                                        onChange={onInputChange}
-                                        currency={currency}
-                                        variant="main"
-                                        placeholder="Ex: 120.000"
-                                    />
-                                    <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-2xl blur opacity-10 group-focus-within:opacity-25 transition duration-500" />
-                                </div>
-                                <p className="text-[10px] text-slate-500 italic px-1">
-                                    Introdu venitul tău brut total pe an. Toate calculele sunt estimate pe baza acestui total anual.
-                                </p>
+                                    2025 (10%)
+                                </button>
+                                <button
+                                    onClick={() => setFiscalYear(2026)}
+                                    className={cn(
+                                        "flex-1 px-4 py-3 rounded-lg font-bold text-sm transition-all duration-300 relative z-10",
+                                        fiscalYear === 2026 ? "text-white" : "text-slate-400 hover:text-white"
+                                    )}
+                                >
+                                    2026 (16%)
+                                </button>
+                                {/* Sliding Background */}
+                                <div
+                                    className={cn(
+                                        "absolute top-1 bottom-1 w-[calc(50%-4px)] bg-blue-600 rounded-lg shadow-lg shadow-blue-600/20 transition-all duration-300 ease-out",
+                                        fiscalYear === 2025 ? "left-1" : "left-[calc(50%+4px)]" // +4px for spacing
+                                    )}
+                                />
                             </div>
-
-                            <div className="space-y-3 flex flex-col">
-                                <Label className="select-none text-[10px] font-black uppercase tracking-[0.2em] text-blue-400 flex items-center gap-2">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
-                                    Moneda
-                                </Label>
-                                <div className="h-full">
-                                    <CurrencyToggle value={currency} onChange={handleCurrencyChange} className="w-full h-full max-h-[58px]" />
-                                </div>
-                            </div>
-                        </div>
-                        {/* Removed Period Toggle */}
-
-                        {/* Fiscal Year Toggle */}
-                        <div className="grid grid-cols-1 gap-6">
-                            <div className="space-y-3 flex flex-col">
-                                <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">An Fiscal</Label>
-                                <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 h-full max-h-[58px]">
-                                    <button
-                                        onClick={() => setFiscalYear(2025)}
-                                        className={cn(
-                                            "flex-1 px-4 py-2.5 md:py-3 rounded-lg font-semibold text-sm md:text-base transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500",
-                                            fiscalYear === 2025 ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20" : "text-slate-400 hover:text-white hover:bg-white/10"
-                                        )}
-                                    >
-                                        2025 (16%)
-                                    </button>
-                                    <button
-                                        onClick={() => setFiscalYear(2026)}
-                                        className={cn(
-                                            "flex-1 px-4 py-2.5 md:py-3 rounded-lg font-semibold text-sm md:text-base transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500",
-                                            fiscalYear === 2026 ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20" : "text-slate-400 hover:text-white hover:bg-white/10"
-                                        )}
-                                    >
-                                        2026 (16%)
-                                    </button>
-                                </div>
-                                <p className="text-[10px] text-slate-500 italic text-center">
-                                    Impozit dividende: 16% | Salariu minim: {fiscalYear === 2025 ? '4.050' : '4.325'} RON
-                                </p>
-                            </div>
+                            <p className="text-[10px] text-slate-500 italic text-center">
+                                Impozit dividende: {fiscalYear === 2025 ? '10%' : '16%'} | Salariu minim: {fiscalYear === 2025 ? '4.050' : '4.050'} RON
+                            </p>
                         </div>
 
-                        {/* Expenses Field for Profit Calculation */}
-                        <div className="grid grid-cols-1 gap-6">
-                            <div className="space-y-3 flex flex-col">
-                                <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                                    Cheltuieli Anuale (pentru SRL Profit)
-                                </Label>
+                        {/* Expenses Field for Profit Calculation - Symmetric */}
+                        <div className="space-y-2 pt-2">
+                            <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest pl-1">
+                                Cheltuieli Anuale (pentru SRL Profit)
+                            </Label>
+                            <div className="relative">
                                 <InputField
                                     id="expenses-input"
                                     value={options.expensesInput}
@@ -226,11 +241,12 @@ export function FreelanceComparison() {
                                     currency={currency}
                                     variant="compact"
                                     placeholder="Ex: 60.000"
+                                    className="bg-slate-900/50 border-white/10 focus:border-blue-500/50"
                                 />
-                                <p className="text-[10px] text-slate-500 italic">
-                                    La SRL Profit: Impozit 16% se aplică pe Profit (Venituri - Cheltuieli)
-                                </p>
                             </div>
+                            <p className="text-[10px] text-slate-500 italic pl-1">
+                                La SRL Profit: Impozit 16% se aplică pe Profit (Venituri - Cheltuieli)
+                            </p>
                         </div>
 
                         {/* Advanced Settings Toggle */}
@@ -564,6 +580,7 @@ export function FreelanceComparison() {
                     const cass6 = 0.1 * 6 * minWage;
                     const cass12 = 0.1 * 12 * minWage;
                     const cass24 = 0.1 * 24 * minWage;
+                    const divTaxLabel = fiscalYear === 2025 ? '10%' : '16%';
 
                     const getCassBadge = (annualCass: number) => {
                         const diff = 5; // Tolerance
@@ -586,10 +603,12 @@ export function FreelanceComparison() {
                                 net={comparison.PFA.net}
                                 gross={comparison.PFA.gross}
                                 breakdown={[
-                                    { label: 'Facturat Anual', value: comparison.PFA.gross, isPositive: true },
-                                    { label: 'CASS (Sănătate)', value: -comparison.PFA.breakdown.cass, badge: getCassBadge(pfaCassAnnual) },
-                                    { label: 'CAS (Pensie)', value: -comparison.PFA.breakdown.cas },
-                                    { label: 'Impozit pe venit', value: -comparison.PFA.breakdown.incomeTax },
+                                    { label: 'Venituri', value: comparison.PFA.breakdown.venituri ?? comparison.PFA.gross, isPositive: true },
+                                    { label: 'Cheltuieli', value: -(comparison.PFA.breakdown.cheltuieli ?? 0) },
+                                    { label: 'Venit Impozabil', value: comparison.PFA.breakdown.netIncome ?? 0, isPositive: true },
+                                    { label: 'Impozit 10%', value: -comparison.PFA.breakdown.incomeTax },
+                                    { label: 'CASS (10%)', value: -comparison.PFA.breakdown.cass, badge: getCassBadge(pfaCassAnnual) },
+                                    { label: 'CAS (25%)', value: -comparison.PFA.breakdown.cas },
                                 ]}
                                 currency={currency}
                                 period={period}
@@ -603,10 +622,14 @@ export function FreelanceComparison() {
                                 net={comparison.Micro.net}
                                 gross={comparison.Micro.gross}
                                 breakdown={[
-                                    { label: 'Facturat Anual', value: comparison.Micro.gross, isPositive: true },
+                                    { label: 'Venituri', value: comparison.Micro.breakdown.venituri ?? comparison.Micro.gross, isPositive: true },
+                                    { label: 'Cheltuieli', value: -(comparison.Micro.breakdown.cheltuieli ?? 0) },
+                                    { label: 'Salarii', value: -(comparison.Micro.breakdown.salarii ?? 0) },
+                                    { label: 'Plati pt Salarii', value: -(comparison.Micro.breakdown.platiSalarii ?? 0) },
                                     { label: 'Impozit Micro (1%)', value: -comparison.Micro.breakdown.microTax },
-                                    { label: 'Impozit Dividende (16%)', value: -comparison.Micro.breakdown.dividendTax },
-                                    { label: 'CASS Dividende', value: -comparison.Micro.breakdown.cassDividend, badge: getCassBadge(microCassAnnual) },
+                                    { label: 'Dividende (brut)', value: comparison.Micro.breakdown.dividendeBrut ?? 0, isPositive: true },
+                                    { label: `Imp Div (${divTaxLabel})`, value: -comparison.Micro.breakdown.dividendTax },
+                                    { label: 'CASS (10%)', value: -comparison.Micro.breakdown.cassDividend, badge: getCassBadge(microCassAnnual) },
                                 ]}
                                 currency={currency}
                                 period={period}
@@ -620,10 +643,12 @@ export function FreelanceComparison() {
                                 net={comparison.Profit.net}
                                 gross={comparison.Profit.gross}
                                 breakdown={[
-                                    { label: 'Facturat Anual', value: comparison.Profit.gross, isPositive: true },
-                                    { label: 'Impozit Profit (16%)', value: -comparison.Profit.breakdown.microTax },
-                                    { label: 'Impozit Dividende (16%)', value: -comparison.Profit.breakdown.dividendTax },
-                                    { label: 'CASS Dividende', value: -comparison.Profit.breakdown.cassDividend, badge: getCassBadge(profitCassAnnual) },
+                                    { label: 'Venituri', value: comparison.Profit.breakdown.venituri ?? comparison.Profit.gross, isPositive: true },
+                                    { label: 'Cheltuieli', value: -(comparison.Profit.breakdown.cheltuieli ?? 0) },
+                                    { label: 'Impozit 16%', value: -(comparison.Profit.breakdown.profitTax ?? 0) },
+                                    { label: 'Dividende (brut)', value: comparison.Profit.breakdown.dividendeBrut ?? 0, isPositive: true },
+                                    { label: `Imp Div (${divTaxLabel})`, value: -comparison.Profit.breakdown.dividendTax },
+                                    { label: 'CASS (10%)', value: -comparison.Profit.breakdown.cassDividend, badge: getCassBadge(profitCassAnnual) },
                                 ]}
                                 currency={currency}
                                 period={period}

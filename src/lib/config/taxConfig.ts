@@ -22,7 +22,7 @@ const BASE_RATES = {
     SRL_BASE: Object.freeze({
         MICRO_TAX_LOW: 0.01,
         MICRO_TAX_HIGH: 0.01,
-        REVENUE_THRESHOLD: 60000,
+        REVENUE_THRESHOLD: 5000000, // Effectively infinite or just set high to avoid confusion, but taxes are equal anyway
         CASS_ON_DIVIDENDS: 0.10,
         CASS_CAP_DIVIDEND: 24
     })
@@ -31,12 +31,14 @@ const BASE_RATES = {
 // Year-specific rates
 const YEAR_RATES = {
     2025: {
-        DIVIDEND_TAX: 0.16,  // Matched to user Excel
+        DIVIDEND_TAX: 0.10,  // 10% for 2025
+        PFA_INCOME_TAX: 0.10,
         MINIMUM_WAGE: 4050
     },
     2026: {
         DIVIDEND_TAX: 0.16,  // 16% for 2026
-        MINIMUM_WAGE: 4325
+        PFA_INCOME_TAX: 0.16,
+        MINIMUM_WAGE: 4050
     }
 } as const;
 
@@ -50,7 +52,10 @@ export function getTaxRatesForYear(year: FiscalYear): TaxRates {
 
     return Object.freeze({
         CIM: BASE_RATES.CIM,
-        PFA: BASE_RATES.PFA,
+        PFA: Object.freeze({
+            ...BASE_RATES.PFA,
+            INCOME_TAX: yearRates.PFA_INCOME_TAX
+        }),
         SRL: Object.freeze({
             ...BASE_RATES.SRL_BASE,
             DIVIDEND_TAX: yearRates.DIVIDEND_TAX

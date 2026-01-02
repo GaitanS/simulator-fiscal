@@ -112,6 +112,9 @@ export interface CIMBreakdown {
  * Defalcare taxe PFA
  */
 export interface PFABreakdown {
+  readonly venituri?: number;
+  readonly cheltuieli?: number;
+  readonly netIncome?: number;
   readonly cas: number;
   readonly casCapped: boolean;
   readonly cass: number;
@@ -123,11 +126,20 @@ export interface PFABreakdown {
  * Defalcare taxe SRL
  */
 export interface SRLBreakdown {
+  readonly venituri?: number;
+  readonly cheltuieli?: number;
+  readonly salarii?: number;
+  readonly platiSalarii?: number;
   readonly microTax: number;
-  readonly microTaxRate: number;
+  readonly microTaxRate?: number;
+  readonly profitTax?: number;
   readonly dividendTax: number;
-  readonly cassDividend: number;
-  readonly cassDividendCapped: boolean;
+  readonly dividendeBrut?: number;
+  readonly dividendeNet?: number;
+  readonly cassDividend?: number;
+  readonly cass?: number; // Alias for cassDividend
+  readonly cassDividendCapped?: boolean;
+  readonly employeeCost?: number;
 }
 
 /**

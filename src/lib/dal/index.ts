@@ -285,15 +285,18 @@ class FiscalDataAccessLayer {
     public calculatePFA(
         grossIncome: number,
         currency: Currency = 'RON',
-        isPensioner: boolean = false,
-        isHandicapped: boolean = false,
-        period: 'MONTHLY' | 'ANNUAL' = 'ANNUAL'
+        period: 'MONTHLY' | 'ANNUAL' = 'ANNUAL',
+        options?: {
+            expenses?: number;
+            isPensioner?: boolean;
+        },
+        fiscalYear: FiscalYear = 2025
     ): PFACalculationResult {
         const grossIncomeRON = currency === 'EUR'
             ? convertCurrency(grossIncome, 'EUR', 'RON', this.exchangeRate)
             : grossIncome;
 
-        const result = calculatePFA(grossIncomeRON, isPensioner, isHandicapped, period);
+        const result = calculatePFA(grossIncomeRON, period, options, fiscalYear);
 
         if (currency === 'EUR') {
             return transformResultCurrency(result, 'EUR', 'RON', this.exchangeRate) as PFACalculationResult;
@@ -374,16 +377,18 @@ class FiscalDataAccessLayer {
         }
 
         const cim = this.calculateCIM(grossIncome, currency);
+
+        // Updated PFA signature: gross, period, options
         const pfa = this.calculatePFA(
             grossIncome,
-            currency,
-            options?.isPensioner,
-            options?.isHandicapped
+            'ANNUAL',
+            { isPensioner: options?.isPensioner }
         );
+
+        // Updated SRL signature: gross, revenue, hasEmployee
         const srl = this.calculateSRL(
             grossIncome,
-            currency,
-            undefined,
+            0,
             options?.hasEmployee
         );
 
@@ -408,7 +413,7 @@ class FiscalDataAccessLayer {
             isPensioner?: boolean;
             isHandicapped?: boolean;
             reinvestedProfit?: number;
-            deductibleProvisions?: number;
+            deductibleProvisions?: number; // Acts as "Expenses"
             fiscalYear?: FiscalYear;
             isUnder26?: boolean;
             dependentsCount?: number;
@@ -432,24 +437,28 @@ class FiscalDataAccessLayer {
 
         const fiscalYear = options?.fiscalYear ?? 2025;
         const period = options?.period ?? 'ANNUAL';
+        const expenses = options?.deductibleProvisions ?? 0;
 
         // Calculate PFA (Standard or with exemptions)
         const pfa = this.calculatePFA(
             grossIncome,
             currency,
-            options?.isPensioner,
-            options?.isHandicapped,
-            period
+            period,
+            {
+                expenses: expenses,
+                isPensioner: options?.isPensioner
+            },
+            fiscalYear
         );
 
         // Calculate SRL Micro (Assume has employee = true)
         const micro = this.calculateSRL(
             grossIncome,
             currency,
-            undefined,
-            true, // Enforce Micro logic
-            0,
-            0,
+            0,          // Annual Revenue (0 = use calculated)
+            true,       // hasEmployee
+            0,          // reinvestedProfit
+            expenses,   // deductibleProvisions
             fiscalYear,
             period
         );
@@ -458,10 +467,10 @@ class FiscalDataAccessLayer {
         const profit = this.calculateSRL(
             grossIncome,
             currency,
-            undefined,
-            false, // Enforce Profit logic
+            0,          // Annual Revenue
+            false,      // hasEmployee
             options?.reinvestedProfit ?? 0,
-            options?.deductibleProvisions ?? 0,
+            expenses,   // deductibleProvisions
             fiscalYear,
             period
         );

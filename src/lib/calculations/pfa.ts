@@ -2,79 +2,85 @@
  * Calculează taxele pentru PFA (Sistem Real)
  * Direct calculation: Gross (Facturat) -> Net
  */
-import { TAX_RATES } from '../config/taxConfig';
+import { getTaxRatesForYear, type FiscalYear } from '../config/taxConfig';
 import type { CalculationResult } from '../dal/types';
 
 export function calculatePFA(
     grossIncome: number,
-    isPensioner: boolean = false,
-    isHandicapped: boolean = false,
-    period: 'MONTHLY' | 'ANNUAL' = 'ANNUAL'
+    period: 'MONTHLY' | 'ANNUAL' = 'ANNUAL',
+    options?: { // Add options for expenses
+        expenses?: number;
+        isPensioner?: boolean;
+    },
+    fiscalYear: FiscalYear = 2025
 ): CalculationResult {
-    const { CAS, CASS, INCOME_TAX, CAS_CAP_LOW, CAS_CAP_HIGH, CASS_CAPS } = TAX_RATES.PFA;
-    const { MINIMUM_WAGE } = TAX_RATES.CONSTANTS;
+    const rates = getTaxRatesForYear(fiscalYear);
+    const { CAS, CASS, INCOME_TAX, CAS_CAP_LOW, CAS_CAP_HIGH, CASS_CAPS } = rates.PFA;
+    const { MINIMUM_WAGE } = rates.CONSTANTS; // 4050
 
-    const annualGross = period === 'ANNUAL' ? grossIncome : grossIncome * 12;
-    const minWageAnnual = MINIMUM_WAGE * 12;
+    const revenue = period === 'ANNUAL' ? grossIncome : grossIncome * 12;
+    const expenses = options?.expenses || 0; // Support expense passing
+    const netIncome = Math.max(0, revenue - expenses); // Profit Real
 
     // --- CAS (Pensie) ---
-    // Se plateste daca venitul >= 12 salarii
-    // Baza de calcul: 
-    // - intre 12 si 24 salarii: la nivelul a 12 salarii (min) sau ales de contrib (ne vom limita la minim obligatoriu)
-    // - peste 24 salarii: la nivelul a 24 salarii
-
-    let casBase = 0;
-    if (!isPensioner) { // Pensioners are exempt from CAS
-        if (annualGross >= CAS_CAP_HIGH * MINIMUM_WAGE) {
-            casBase = CAS_CAP_HIGH * MINIMUM_WAGE;
-        } else if (annualGross >= CAS_CAP_LOW * MINIMUM_WAGE) {
-            casBase = CAS_CAP_LOW * MINIMUM_WAGE;
+    // Tiers: 12 or 24 salaries based on Net Income (Strict Legal)
+    // 2026 Norms: 24 Sal = 97.200 RON. 12 Sal = 48.600 RON.
+    let casBaseSummary = 0;
+    if (!options?.isPensioner) {
+        if (netIncome >= CAS_CAP_HIGH * MINIMUM_WAGE) {
+            casBaseSummary = CAS_CAP_HIGH * MINIMUM_WAGE; // 24 salaries
+        } else if (netIncome >= CAS_CAP_LOW * MINIMUM_WAGE) {
+            casBaseSummary = CAS_CAP_LOW * MINIMUM_WAGE; // 12 salaries
         }
+        // Below 12 salaries: Optional (0 for strict calculator)
     }
-
-    const annualCas = casBase * CAS;
-    const casContribution = period === 'ANNUAL' ? annualCas : (annualCas / 12);
-    const casCapped = casBase > 0;
+    const cas = casBaseSummary * CAS;
 
     // --- CASS (Sanatate) ---
-    // Plafoane: 6, 12, 24, 60 salarii
-    // 10% din venitul net fiscal (brut - cheltuieli), dar nu mai putin de 6 salarii si nu mai mult de 60
-    // Simplificare: consideram brut = venit net fiscal (fara cheltuieli deductibile in simulator simplu)
+    // 10% of Net Income (Profit Real), capped at 60 (2025) or 72 (2026) salaries.
+    // User requested "Strict Legal" and confirmed 72 salaries cap for 2026.
 
-    let cassBase = annualGross;
+    // Determine Max Cap based on year logic or config
+    // Config CASS_CAPS is [6, 12, 24, 72]. 72 is the 2026 cap.
+    // 2025 cap was 60.
+    const maxCassCap = fiscalYear === 2026 ? 72 : 60;
 
-    // Plafonare minima (6 salarii)
-    if (cassBase < CASS_CAPS[0] * MINIMUM_WAGE) {
-        // Daca e sub 6 salarii, se plateste la 6 salarii
-        cassBase = CASS_CAPS[0] * MINIMUM_WAGE;
+    let cassBase = netIncome;
+    if (cassBase > maxCassCap * MINIMUM_WAGE) {
+        cassBase = maxCassCap * MINIMUM_WAGE;
     }
 
-    // Plafonare maxima (60 salarii)
-    if (cassBase > CASS_CAPS[3] * MINIMUM_WAGE) {
-        cassBase = CASS_CAPS[3] * MINIMUM_WAGE;
+    // Floor of 6 salaries if income exists?
+    // STRICT LEGAL: If Net Income > 0, Min Base is 6 salaries (unless exception).
+    const minCassBase = 6 * MINIMUM_WAGE;
+    if (netIncome > 0 && cassBase < minCassBase) {
+        cassBase = minCassBase;
     }
+    // Note: If netIncome is huge (100k), floor is irrelevant.
 
-    const annualCass = cassBase * CASS;
-    const cassContribution = period === 'ANNUAL' ? annualCass : (annualCass / 12);
-    const cassCapped = annualGross > (CASS_CAPS[3] * MINIMUM_WAGE);
+    const cass = cassBase * CASS;
 
-    const taxableBase = Math.max(0, (period === 'ANNUAL' ? grossIncome : grossIncome) - casContribution - cassContribution);
-    const incomeTax = isHandicapped ? 0 : (taxableBase * INCOME_TAX);
+    // --- INCOME TAX (10% or 16%) ---
+    // Formula: (NetIncome - CAS - CASS) * Rate
+    // Rate is dynamic based on fiscalYear (10% or 16%).
+    const taxableIncome = Math.max(0, netIncome - cas - cass);
+    const incomeTax = taxableIncome * INCOME_TAX;
 
-    const totalTaxes = casContribution + cassContribution + incomeTax;
-    const net = (period === 'ANNUAL' ? grossIncome : grossIncome) - totalTaxes;
+    const totalTaxes = cas + cass + incomeTax;
+    const net = netIncome - totalTaxes; // Net In Hand
 
-    return Object.freeze({
-        gross: grossIncome,
-        net: Math.round(net * 100) / 100,
-        totalTaxes: Math.round(totalTaxes * 100) / 100,
-        breakdown: Object.freeze({
-            cas: Math.round(casContribution * 100) / 100,
-            cass: Math.round(cassContribution * 100) / 100,
-            incomeTax: Math.round(incomeTax * 100) / 100,
-            casCapped,
-            cassCapped
-        }),
-        scenario: 'PFA'
-    });
+    return {
+        gross: revenue,
+        net: period === 'ANNUAL' ? net : (net / 12),
+        netMonthly: net / 12,
+        totalTaxes: period === 'ANNUAL' ? totalTaxes : (totalTaxes / 12),
+        breakdown: {
+            venituri: revenue,
+            cheltuieli: expenses,
+            netIncome: netIncome,
+            cas: cas,
+            cass: cass,
+            incomeTax: incomeTax
+        }
+    };
 }
