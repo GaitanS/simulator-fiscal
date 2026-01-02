@@ -155,6 +155,8 @@ export interface CalculationResult {
   readonly gross: number;
   /** Salariu/Venit net rezultat */
   readonly net: number;
+  /** Salariu net lunar (opțional) */
+  readonly netMonthly?: number;
   /** Total taxe plătite */
   readonly totalTaxes: number;
   /** Defalcare detaliată taxe */
