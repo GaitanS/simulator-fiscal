@@ -672,7 +672,7 @@ export function FreelanceComparison() {
                                     },
                                     {
                                         label: 'CASS (10%)',
-                                        value: -comparison.Micro.breakdown.cassDividend,
+                                        value: -(comparison.Micro.breakdown.cassDividend ?? 0),
                                         badge: getCassBadge(microCassAnnual),
                                         explanation: 'Plafon 24 salarii minime.'
                                     },
@@ -715,7 +715,7 @@ export function FreelanceComparison() {
                                     },
                                     {
                                         label: 'CASS (10%)',
-                                        value: -comparison.Profit.breakdown.cassDividend,
+                                        value: -(comparison.Profit.breakdown.cassDividend ?? 0),
                                         badge: getCassBadge(profitCassAnnual),
                                         explanation: 'Plafon 24 salarii minime.'
                                     },
