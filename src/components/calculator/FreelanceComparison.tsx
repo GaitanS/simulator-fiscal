@@ -591,8 +591,8 @@ export function FreelanceComparison() {
                     };
 
                     const pfaCassAnnual = comparison.PFA.breakdown.cass * 12;
-                    const microCassAnnual = comparison.Micro.breakdown.cassDividend * 12;
-                    const profitCassAnnual = comparison.Profit.breakdown.cassDividend * 12;
+                    const microCassAnnual = (comparison.Micro.breakdown.cassDividend ?? 0) * 12;
+                    const profitCassAnnual = (comparison.Profit.breakdown.cassDividend ?? 0) * 12;
 
                     return (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-7xl mx-auto">
