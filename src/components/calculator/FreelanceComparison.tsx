@@ -153,7 +153,7 @@ export function FreelanceComparison() {
                                         value={inputValue}
                                         onChange={onInputChange}
                                         currency={currency}
-                                        variant="premium"
+                                        variant="main"
                                         placeholder="Ex: 120.000"
                                     />
                                     <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-2xl blur opacity-10 group-focus-within:opacity-25 transition duration-500" />
