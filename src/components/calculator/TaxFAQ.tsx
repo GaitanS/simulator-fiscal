@@ -18,11 +18,11 @@ const TAX_FAQ_DATA: FAQItem[] = [
     },
     {
         question: "Ce taxe plătește un PFA?",
-        answer: "PFA plătește CAS (25%) plafonat la 24 salarii minime, CASS (10%) plafonat la 60 salarii minime, și Impozit pe Venit (10%) aplicat la venitul net."
+        answer: "PFA plătește CAS (25%) plafonat la 12 sau 24 salarii minime, CASS (10%) plafonat la 72 salarii minime, și Impozit pe Venit (10%) aplicat la venitul net."
     },
     {
         question: "Ce este impozitul Micro pentru SRL?",
-        answer: "SRL Microîntreprindere plătește 1% din cifra de afaceri dacă are angajat și venituri sub 60.000 EUR, sau 3% dacă nu are angajat sau depășește pragul."
+        answer: "SRL Microîntreprindere plătește 1% din cifra de afaceri. Condiție obligatorie: minim un angajat."
     },
     {
         question: "Cum se calculează dividendele la SRL?",

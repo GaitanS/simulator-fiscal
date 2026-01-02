@@ -16,12 +16,12 @@ const BASE_RATES = {
         CAS_CAP_LOW: 12,
         CAS_CAP_HIGH: 24,
         CASS: 0.10,
-        CASS_CAPS: Object.freeze([6, 12, 24, 60]),
+        CASS_CAPS: Object.freeze([6, 12, 24, 72]),
         INCOME_TAX: 0.10
     }),
     SRL_BASE: Object.freeze({
         MICRO_TAX_LOW: 0.01,
-        MICRO_TAX_HIGH: 0.03,
+        MICRO_TAX_HIGH: 0.01,
         REVENUE_THRESHOLD: 60000,
         CASS_ON_DIVIDENDS: 0.10,
         CASS_CAP_DIVIDEND: 24

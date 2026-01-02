@@ -101,7 +101,7 @@ export default function Home() {
                 iconBg="bg-emerald-900/30"
                 iconColor="text-emerald-400"
                 title="PFA – Sistem Real"
-                description="Persoană Fizică Autorizată. Contribuții (CAS, CASS) plafonate la 12/24/60 salarii minime, în funcție de venit."
+                description="Contribuții CAS, plafonate la 12/24 si CASS 72 salarii minime"
               />
 
               <InfoCard
@@ -109,7 +109,7 @@ export default function Home() {
                 iconBg="bg-purple-900/30"
                 iconColor="text-purple-400"
                 title="Microîntreprindere"
-                description="Impozit pe venit (1% sau 3%) + 8% impozit pe dividende. Necesită minim un angajat pentru cota de 1%."
+                description="Impozit pe venit 1% + 8% impozit pe dividende. Necesită un angajat."
               />
 
               <InfoCard
@@ -117,7 +117,7 @@ export default function Home() {
                 iconBg="bg-blue-900/30"
                 iconColor="text-blue-400"
                 title="SRL – Profit 16%"
-                description="Impozit de 16% pe profitul net. Variantă optimă pentru cheltuieli mari sau când nu îndeplinești condițiile Micro."
+                description="Impozit de 16% pe profitul net + 8% dividende. Optim pentru cheltuieli mari."
               />
             </div>
           </section>
