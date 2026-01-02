@@ -70,6 +70,7 @@ export function calculatePFA(
     const net = netIncome - totalTaxes; // Net In Hand
 
     return {
+        scenario: 'PFA',
         gross: revenue,
         net: period === 'ANNUAL' ? net : (net / 12),
         netMonthly: net / 12,

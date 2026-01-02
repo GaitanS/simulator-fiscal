@@ -102,6 +102,7 @@ export function calculateSRL(
     const net = (netDividends - cass) + netSalary;
 
     return {
+        scenario: 'SRL',
         gross: revenue,
         net: period === 'ANNUAL' ? net : (net / 12),
         netMonthly: net / 12,
