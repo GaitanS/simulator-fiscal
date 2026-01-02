@@ -25,6 +25,10 @@ export interface CIMRates {
   readonly PERSONAL_DEDUCTION: number;
   /** CAM - Contribuție Asiguratorie pentru Muncă: 2.25% */
   readonly CAM: number;
+  /** Deducere tineri sub 26 (15% din salariu minim) */
+  readonly DEDUCTION_YOUTH_RATE: number;
+  /** Deducere per copil (100 RON) */
+  readonly DEDUCTION_PER_CHILD: number;
 }
 
 /**
