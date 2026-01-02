@@ -605,10 +605,32 @@ export function FreelanceComparison() {
                                 breakdown={[
                                     { label: 'Venituri', value: comparison.PFA.breakdown.venituri ?? comparison.PFA.gross, isPositive: true },
                                     { label: 'Cheltuieli', value: -(comparison.PFA.breakdown.cheltuieli ?? 0) },
-                                    { label: 'Venit Impozabil', value: comparison.PFA.breakdown.netIncome ?? 0, isPositive: true },
-                                    { label: 'Impozit 10%', value: -comparison.PFA.breakdown.incomeTax },
-                                    { label: 'CASS (10%)', value: -comparison.PFA.breakdown.cass, badge: getCassBadge(pfaCassAnnual) },
-                                    { label: 'CAS (25%)', value: -comparison.PFA.breakdown.cas },
+                                    {
+                                        label: 'CAS (25%)',
+                                        value: -comparison.PFA.breakdown.cas,
+                                        badge: getCassBadge(pfaCassAnnual),
+                                        explanation: 'Plafon 12 sau 24 salarii minime (4.050 lei).'
+                                    },
+                                    {
+                                        label: 'CASS (10%)',
+                                        value: -comparison.PFA.breakdown.cass,
+                                        explanation: fiscalYear === 2026
+                                            ? '10% din profit (sub noul plafon de 72 salarii).'
+                                            : '10% din net (plafon 60 salarii).'
+                                    },
+                                    {
+                                        label: 'Venit Impozabil',
+                                        value: comparison.PFA.breakdown.netIncome ?? 0,
+                                        isPositive: true,
+                                        explanation: 'Venit - Cheltuieli - CAS - CASS.'
+                                    },
+                                    {
+                                        label: `Impozit ${fiscalYear === 2026 ? '16%' : '10%'}`,
+                                        value: -comparison.PFA.breakdown.incomeTax,
+                                        explanation: fiscalYear === 2026
+                                            ? 'Cota crește oficial de la 10% la 16%.'
+                                            : '10% din Venitul Impozabil.'
+                                    },
                                 ]}
                                 currency={currency}
                                 period={period}
@@ -624,12 +646,36 @@ export function FreelanceComparison() {
                                 breakdown={[
                                     { label: 'Venituri', value: comparison.Micro.breakdown.venituri ?? comparison.Micro.gross, isPositive: true },
                                     { label: 'Cheltuieli', value: -(comparison.Micro.breakdown.cheltuieli ?? 0) },
-                                    { label: 'Salarii', value: -(comparison.Micro.breakdown.salarii ?? 0) },
+                                    {
+                                        label: 'Salarii (Cost Total)',
+                                        value: -(comparison.Micro.breakdown.salarii ?? 0),
+                                        explanation: 'Include CAM 2.25%. Cost deductibil.'
+                                    },
                                     { label: 'Plati pt Salarii', value: -(comparison.Micro.breakdown.platiSalarii ?? 0) },
-                                    { label: 'Impozit Micro (1%)', value: -comparison.Micro.breakdown.microTax },
-                                    { label: 'Dividende (brut)', value: comparison.Micro.breakdown.dividendeBrut ?? 0, isPositive: true },
-                                    { label: `Imp Div (${divTaxLabel})`, value: -comparison.Micro.breakdown.dividendTax },
-                                    { label: 'CASS (10%)', value: -comparison.Micro.breakdown.cassDividend, badge: getCassBadge(microCassAnnual) },
+                                    {
+                                        label: 'Impozit Micro (1%)',
+                                        value: -comparison.Micro.breakdown.microTax,
+                                        explanation: fiscalYear === 2026 ? 'Se menține cota de 1% (eliminându-se cea de 3%).' : '1% din Cifra de Afaceri.'
+                                    },
+                                    {
+                                        label: 'Dividende (brut)',
+                                        value: comparison.Micro.breakdown.dividendeBrut ?? 0,
+                                        isPositive: true,
+                                        explanation: 'Profit net distribuit.'
+                                    },
+                                    {
+                                        label: `Imp Div (${divTaxLabel})`,
+                                        value: -comparison.Micro.breakdown.dividendTax,
+                                        explanation: fiscalYear === 2026
+                                            ? 'Crește de la 10% la 16%.'
+                                            : '10% impozit pe dividende.'
+                                    },
+                                    {
+                                        label: 'CASS (10%)',
+                                        value: -comparison.Micro.breakdown.cassDividend,
+                                        badge: getCassBadge(microCassAnnual),
+                                        explanation: 'Plafon 24 salarii minime.'
+                                    },
                                 ]}
                                 currency={currency}
                                 period={period}
@@ -644,11 +690,35 @@ export function FreelanceComparison() {
                                 gross={comparison.Profit.gross}
                                 breakdown={[
                                     { label: 'Venituri', value: comparison.Profit.breakdown.venituri ?? comparison.Profit.gross, isPositive: true },
-                                    { label: 'Cheltuieli', value: -(comparison.Profit.breakdown.cheltuieli ?? 0) },
-                                    { label: 'Impozit 16%', value: -(comparison.Profit.breakdown.profitTax ?? 0) },
-                                    { label: 'Dividende (brut)', value: comparison.Profit.breakdown.dividendeBrut ?? 0, isPositive: true },
-                                    { label: `Imp Div (${divTaxLabel})`, value: -comparison.Profit.breakdown.dividendTax },
-                                    { label: 'CASS (10%)', value: -comparison.Profit.breakdown.cassDividend, badge: getCassBadge(profitCassAnnual) },
+                                    {
+                                        label: 'Cheltuieli',
+                                        value: -(comparison.Profit.breakdown.cheltuieli ?? 0),
+                                        explanation: 'Cheltuieli deductibile (ex. chirie, echipamente).'
+                                    },
+                                    {
+                                        label: 'Impozit 16%',
+                                        value: -(comparison.Profit.breakdown.profitTax ?? 0),
+                                        explanation: '16% din Venitul Impozabil.'
+                                    },
+                                    {
+                                        label: 'Dividende (brut)',
+                                        value: comparison.Profit.breakdown.dividendeBrut ?? 0,
+                                        isPositive: true,
+                                        explanation: 'Profit net distribuit.'
+                                    },
+                                    {
+                                        label: `Imp Div (${divTaxLabel})`,
+                                        value: -comparison.Profit.breakdown.dividendTax,
+                                        explanation: fiscalYear === 2026
+                                            ? 'Crește de la 10% la 16%.'
+                                            : '10% impozit pe dividende.'
+                                    },
+                                    {
+                                        label: 'CASS (10%)',
+                                        value: -comparison.Profit.breakdown.cassDividend,
+                                        badge: getCassBadge(profitCassAnnual),
+                                        explanation: 'Plafon 24 salarii minime.'
+                                    },
                                 ]}
                                 currency={currency}
                                 period={period}
@@ -669,7 +739,7 @@ interface ComparisonCardProps {
     subtitle?: string;
     net: number;
     gross: number;
-    breakdown: { label: string; value: number; isPositive?: boolean; badge?: string }[];
+    breakdown: { label: string; value: number; isPositive?: boolean; badge?: string; explanation?: string }[];
     currency: Currency;
     period: 'MONTHLY' | 'ANNUAL';
     isOptimal?: boolean;
@@ -679,83 +749,95 @@ function ComparisonCard({ title, subtitle, net, gross, breakdown, currency, peri
     const totalTaxes = gross - net;
 
     return (
-        <Card className={cn(
-            "overflow-hidden border-0 bg-slate-900/40 backdrop-blur-xl ring-1 shadow-2xl transition-all duration-300 flex flex-col",
-            isOptimal ? "ring-blue-500 ring-2 scale-[1.02] z-10" : "ring-white/10 hover:ring-white/20"
-        )}>
-            {/* Optimal Badge */}
+        <div className={cn("relative h-full", isOptimal && "z-20")}>
+            <Card className={cn(
+                "overflow-hidden border-0 bg-slate-900/40 backdrop-blur-xl shadow-2xl transition-all duration-300 flex flex-col h-full relative",
+                isOptimal ? "ring-2 ring-blue-500/50 scale-[1.02]" : "ring-1 ring-white/10 hover:ring-white/20"
+            )}>
+                {/* Top Highlight Line for Optimal */}
+                {isOptimal && <div className="absolute top-0 inset-x-0 h-1 bg-blue-500" />}
+
+                {/* Header */}
+                <div className="p-6 space-y-4">
+                    <div className="flex justify-between items-start">
+                        <div className="space-y-0.5">
+                            <div className="flex items-center gap-2">
+                                <h4 className="font-black text-xl text-white tracking-tight uppercase">{title}</h4>
+                                {subtitle && <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter">{subtitle}</span>}
+                            </div>
+                            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Bani în mână</p>
+                        </div>
+                        {isOptimal && <CheckCircle2 className="w-5 h-5 text-blue-500" />}
+                    </div>
+
+                    <div className="flex items-baseline gap-2">
+                        <span className="text-4xl font-black text-white tracking-tight">
+                            {fiscalDAL.formatCurrency(net, currency)}
+                        </span>
+                    </div>
+                </div>
+
+                <CardContent className="p-0 flex-1 flex flex-col">
+                    <div className="divide-y divide-white/5 flex-1 flex flex-col">
+                        {/* Breakdown Items */}
+                        <div className="px-6 py-4 space-y-3 flex-1">
+                            {breakdown.map((item, idx) => (
+                                <div key={idx} className="flex flex-col gap-1 text-sm group">
+                                    <div className="flex items-center justify-between">
+                                        <span className="font-bold text-slate-400 group-hover:text-slate-200 transition-colors uppercase tracking-tight">{item.label}</span>
+                                        <div className="flex items-center gap-3">
+                                            <span className={cn(
+                                                "font-bold tracking-tight text-right tabular-nums",
+                                                item.isPositive ? "text-blue-400" : "text-white"
+                                            )}>
+                                                {item.isPositive ? '+' : ''}{fiscalDAL.formatCurrency(item.value, currency)}
+                                            </span>
+                                            {item.badge && (
+                                                <span className="text-[9px] font-black px-2 py-0.5 rounded bg-yellow-500/10 text-yellow-500 ring-1 ring-yellow-500/20 uppercase tracking-tighter whitespace-nowrap">
+                                                    {item.badge}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    {item.explanation && (
+                                        <p className="text-[10px] text-slate-500 italic pl-2 border-l-2 border-slate-700/50">
+                                            {item.explanation}
+                                        </p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Summary Footer */}
+                        <div className="px-6 py-4 bg-white/5 space-y-3 mt-auto">
+                            <div className="flex justify-between items-center">
+                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Taxe de plată</span>
+                                <span className="text-sm font-black text-white">
+                                    -{fiscalDAL.formatCurrency(totalTaxes, currency)}
+                                </span>
+                            </div>
+
+                            <div className="h-px bg-white/10 w-full" />
+
+                            <div className="flex justify-between items-center pt-1">
+                                <span className="text-[11px] font-black text-white uppercase tracking-widest">Bani în mână</span>
+                                <div className="text-right">
+                                    <span className="text-2xl font-black text-white block leading-none">
+                                        {fiscalDAL.formatCurrency(net, currency)}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* Outside Bottom Badge */}
             {isOptimal && (
-                <div className="bg-blue-600 text-[10px] font-black text-white uppercase tracking-widest py-1.5 px-3 text-center">
+                <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[10px] font-black px-4 py-1 rounded-full shadow-lg border border-blue-400 uppercase tracking-widest z-30">
                     Recomandat
                 </div>
             )}
-
-            {/* Header */}
-            <div className="p-6 space-y-4 flex-1">
-                <div className="flex justify-between items-start">
-                    <div className="space-y-0.5">
-                        <div className="flex items-center gap-2">
-                            <h4 className="font-black text-xl text-white tracking-tight uppercase">{title}</h4>
-                            {subtitle && <span className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter">{subtitle}</span>}
-                        </div>
-                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Bani în mână</p>
-                    </div>
-                    {isOptimal && <CheckCircle2 className="w-5 h-5 text-blue-400" />}
-                </div>
-
-                <div className="flex items-baseline gap-2">
-                    <span className="text-4xl font-black text-white tracking-tight">
-                        {fiscalDAL.formatCurrency(net, currency)}
-                    </span>
-                </div>
-            </div>
-
-            <CardContent className="p-0">
-                <div className="divide-y divide-white/5">
-                    {/* Breakdown Items */}
-                    <div className="px-6 py-4 space-y-3">
-                        {breakdown.map((item, idx) => (
-                            <div key={idx} className="flex items-center justify-between text-sm group">
-                                <span className="font-bold text-slate-400 group-hover:text-slate-200 transition-colors uppercase tracking-tight">{item.label}</span>
-                                <div className="flex items-center gap-3">
-                                    <span className={cn(
-                                        "font-bold tracking-tight text-right tabular-nums",
-                                        item.isPositive ? "text-blue-400" : "text-white"
-                                    )}>
-                                        {item.isPositive ? '+' : ''}{fiscalDAL.formatCurrency(item.value, currency)}
-                                    </span>
-                                    {item.badge && (
-                                        <span className="text-[9px] font-black px-2 py-0.5 rounded bg-yellow-500/10 text-yellow-500 ring-1 ring-yellow-500/20 uppercase tracking-tighter whitespace-nowrap">
-                                            {item.badge}
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-
-                    {/* Summary Footer */}
-                    <div className="px-6 py-4 bg-white/5 space-y-3">
-                        <div className="flex justify-between items-center">
-                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Taxe de plată</span>
-                            <span className="text-sm font-black text-white">
-                                -{fiscalDAL.formatCurrency(totalTaxes, currency)}
-                            </span>
-                        </div>
-
-                        <div className="h-px bg-white/10 w-full" />
-
-                        <div className="flex justify-between items-center pt-1">
-                            <span className="text-[11px] font-black text-white uppercase tracking-widest">Bani în mână</span>
-                            <div className="text-right">
-                                <span className="text-2xl font-black text-white block leading-none">
-                                    {fiscalDAL.formatCurrency(net, currency)}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </CardContent>
-        </Card>
+        </div>
     );
 }
